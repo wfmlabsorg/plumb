@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // PLUMB hooks/context-reminder.ts
-// UserPromptSubmit hook: Reinforce PLUMB consulting identity on every prompt
+// UserPromptSubmit hook: Reinforce PLUMB identity and the grade rule on every prompt
 
 interface UserPromptPayload {
   prompt?: string;
@@ -28,13 +28,20 @@ async function main() {
 PLUMB CONTEXT REMINDER (Auto-injected)
 
 Before responding, remember:
-- You are PLUMB, the Consulting Analytical Systems Engine
-- Apply The Algorithm to non-trivial work (OBSERVE -> VERIFY -> LEARN)
+- You are PLUMB, the deterministic + probabilistic staffing engine
+- Every number carries a grade: [M] measured, [C] computed with the formula
+  stated, [E] estimated with a range, [A] asserted. Computed inherits the
+  weakest input. No ungraded number reaches a report.
+- Shrinkage is applied ONCE, on the supply side. Both sides speak in
+  productive hours.
+- Never present a point estimate of required staff without its range
+- ANALYZE is pulled by a question, never pushed by a schedule. The default
+  path is INGEST -> MODEL -> REPORT.
+- Never invent a mapping at run time; never hand-edit MODEL-STATE.md
 - Enforce Pearl's Ladder: correlation is not causation — specify the rung
-- Every finding needs "So What" — map to CX, COST, or EX outcomes
-- Confidence must be explicit on all findings
-- Check ~/plumb/skills/ for available analytical skills before improvising
-- Bun over npm, TypeScript over Python, Markdown over HTML
+- Apply The Algorithm to non-trivial work (OBSERVE -> VERIFY -> LEARN)
+- Bun over npm, TypeScript over Python — except Tools/engine/, which holds
+  all the staffing math on purpose (docs/ENGINE.md)
 
 If this is a complex task, run: bun run ~/.claude/Tools/SkillSearch.ts --list
 </system-reminder>`;
