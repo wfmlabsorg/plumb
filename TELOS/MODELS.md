@@ -1,71 +1,97 @@
 # PLUMB Mental Models
 
+## The Two-Sided Model
+
+The structure everything else hangs from. Both sides end in **productive hours**, which is what
+makes them comparable.
+
+```
+DEMAND                                    SUPPLY
+
+transactions                              requisitions
+   × contact rate                            → time to fill
+   → contacts                                → class starts
+   × channel split                           → graduation
+   × AHT ÷ concurrency                       → heads
+   → workload hours                       × scheduled hours per head
+   ÷ target occupancy                     × ramp(weeks since graduation)
+   → REQUIRED PRODUCTIVE HOURS            × (1 − shrinkage)
+                                          → DELIVERED PRODUCTIVE HOURS
+
+            gap = delivered − required
+            coverage = P(delivered ≥ required)
+```
+
+**Workload hours** are the hours of work that exist. **Productive hours** are the hours people
+must be logged in and available to absorb that work, idle time included. Dividing by occupancy is
+what converts one into the other, and it is the only place service level enters the demand side.
+
+## The Grade Ladder
+
+```
+[M] Measured   read from data, definition cited
+[C] Computed   formula stated, inherits the weakest input grade
+[E] Estimated  range and assumption stated
+[A] Asserted   one source; never load-bearing alone
+```
+
+Anything carried across a platform, channel or vendor change drops to `[A]` until this operation
+measures it. A benchmark from another book is `[A]`, however confidently it was offered.
+
 ## Pearl's Ladder of Causation
 
-The foundational framework for analytical rigor.
+| Rung | Level | Question | In this domain |
+|------|-------|----------|----------------|
+| 1 | Association | What do I observe? | "AHT rose in the same week the vendor cohort went live" |
+| 2 | Intervention | What happens if I do X? | "Adding eight heads raises coverage from 45% to 62%" |
+| 3 | Counterfactual | What would have happened? | "Without the training pull, service would have held" |
 
-| Rung | Level | Question | Example |
-|------|-------|----------|---------|
-| 1 | Association | What do I observe? | "Sites with high attrition also have low SL" |
-| 2 | Intervention | What happens if I do X? | "If we increase training hours, AHT decreases" |
-| 3 | Counterfactual | What would have happened? | "Had we not cut training, attrition would be 15% lower" |
+**Rule:** BlackBelt operates at Rung 1. CausalAnalyst operates at Rungs 2–3. A Rung 1 finding is
+never presented as causal.
 
-**Rule:** BlackBelt operates at Rung 1. CausalAnalyst operates at Rung 2-3. Never present Rung 1 findings as causal claims.
+## Deterministic vs Probabilistic
 
-## CX / COST / EX Outcome Triangle
+| | Deterministic | Probabilistic |
+|---|---|---|
+| Grain | Daily | Weekly |
+| Answers | "What does the plan require?" | "How likely is the plan to hold?" |
+| Output | Required hours, gap, FTE | P10/P50/P90, coverage, decision curve |
+| Fails when | Inputs vary and the mean is not the mode | Parameters are uncalibrated |
+| Cost | Instant | Seconds |
 
-Every finding must map to at least one outcome dimension:
+They are not alternatives. The deterministic number is the thing people argue with; the band is
+what stops them betting the quarter on it.
 
-- **CX (Customer Experience):** Service levels, CSAT, FCR, quality scores, wait times
-- **COST (Operational Efficiency):** Cost per contact, shrinkage, overtime, technology spend
-- **EX (Employee Experience):** Attrition, engagement, schedule satisfaction, burnout indicators
+## The Flaw of Averages
 
-## DMAIC (Six Sigma)
+A plan built on average volume, average AHT and average shrinkage is not the average plan. Because
+the staffing response is convex, the mean of the outputs exceeds the output of the means — and the
+gap widens exactly when variance is highest. This is why a single deterministic run understates
+risk even when every input is correct.
 
-Process improvement cycle mapped to consulting phases:
+## Value of Information
 
-| DMAIC | Consulting Phase | Activities |
-|-------|-----------------|------------|
-| **Define** | INTAKE | SOW, stakeholders, success criteria |
-| **Measure** | DISCOVERY | Data inventory, baseline metrics |
-| **Analyze** | ANALYSIS | Statistical + causal analysis |
-| **Improve** | SYNTHESIS | Recommendations, business cases |
-| **Control** | DELIVERY + CLOSEOUT | Implementation plan, monitoring |
+Gaps are ranked by **variance contribution per unit of effort to obtain**, not by how badly they
+are missed. A parameter that drives 40% of shortfall variance and takes a day to measure outranks
+one that drives 5% and takes a quarter. Confirm the top few by pinning them in the simulation
+before asking anyone to go collect data.
 
 ## The Algorithm
 
-Universal problem-solving framework: **Current State → Ideal State via Verifiable Iteration**
+**Current State → Ideal State via Verifiable Iteration**
 
 OBSERVE → THINK → PLAN → BUILD → EXECUTE → VERIFY → LEARN
 
-Always define success criteria (BUILD) before executing. Always verify results. Always extract learnings.
-
+Define success criteria before executing. Verify results. Extract learnings.
 Full documentation: `~/plumb/ALGORITHM.md`
 
-## Confidence Ladder
-
-Progressive evidence accumulation:
+## The Path
 
 ```
-LOW (Hypothesis)     → Pattern observed, needs testing
-    ↓ + statistical test
-MEDIUM (Tested)      → Evidence present, mechanism plausible
-    ↓ + causal validation
-HIGH (Validated)     → Confirmed with causal backing
-    ↓ fails validation
-REJECTED             → Tested, found insufficient
+INTAKE → INGEST → MODEL → ANALYZE (optional) → REPORT
+                              ↑
+                    invoked by a question,
+                    never by a schedule
 ```
 
-## Project State Machine
-
-Engagement lifecycle with phase transitions:
-
-```
-INTAKE → DISCOVERY → ANALYSIS → SYNTHESIS → DELIVERY → CLOSEOUT
-   │         │          │           │          │
-   └─────────┴──────────┴───────────┘          │
-         Backward flows allowed                │
-         (scoped, time-boxed, logged)          │
-                                               │
-                                          IMMUTABLE
-```
+One human checkpoint, before REPORT publishes.

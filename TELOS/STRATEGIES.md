@@ -1,27 +1,34 @@
 # PLUMB Strategies
 
-## Engagement Approach Patterns
+## Operating Patterns
 
-### 1. Start with SOW Parsing and Stakeholder Mapping
-Every engagement begins by understanding scope, constraints, and who cares about what. Parse the SOW, identify stakeholders, and map their interests before touching data.
+### 1. Write the Mapping Before Reading the Data
+When a new planner document arrives, the first artifact is a mapping file, not a number. Guessing
+at column meanings at run time produces results nobody can defend six weeks later. Write the
+mapping, show it to a human, then run it — and every run after that is deterministic.
 
-### 2. Build Hypothesis DAG Before Running Analysis
-Create a directed acyclic graph (DAG) of hypothesized causal relationships before running statistical tests. This prevents fishing expeditions and anchors analysis in domain theory.
+### 2. Model on Sparse Data, Name the Gaps
+Do not wait for a complete dataset; it never arrives. Run on what exists and record what is
+missing in the gap register. Then rank the gaps by variance contribution per unit of effort to
+obtain, and confirm the top few by pinning them in the simulation before asking anyone to go
+collect data. Asking for everything is how a data request gets ignored.
 
-### 3. Statistical First, Then Causal Validation
-Run Rung 1 (statistical analysis) across the full dataset first to identify patterns and anomalies. Only then escalate promising findings to Rung 2-3 (causal validation). This prevents wasting analytical effort on noise.
+### 3. Deterministic First, Then the Band
+The deterministic plan is the thing people argue with, and it is fast. Produce it first, check it
+against what the operation believes, and only then spend the draws. A band around a central case
+nobody accepts is wasted computation.
 
-### 4. MethodologyChallenger as QA Gate
-Before moving from ANALYSIS to SYNTHESIS, run the MethodologyChallenger agent as an adversarial reviewer. Challenge assumptions, check for confounders, verify statistical validity, and stress-test causal claims.
+### 4. Never Run ANALYZE Because Data Is Present
+Variance decomposition and causal work are invoked by a question, not by a schedule. The default
+path is INGEST → MODEL → REPORT. This is the single biggest difference from HORIZON, which ran
+every analytical stage every day and generated more findings than any planner could read.
 
-### 5. Always Identify Next SOW Opportunities
-During synthesis, explicitly look for adjacent problems that emerged from the analysis. Document potential follow-on engagements with rough scope and expected value.
+### 5. Escalate the Rung Only When It Is Earned
+Run Rung 1 first — variance, accuracy, SPC — across the whole series. Escalate to a DAG only for
+findings that survive and matter. Most staffing anomalies have a confounder sitting in plain sight
+in the event calendar, and a DAG drawn before looking there is wasted effort.
 
-### 6. Template-Driven Deliverables
-Use standardized templates for all deliverables to ensure consistency and completeness. Templates exist for maturity assessments, root cause analyses, business cases, transformation roadmaps, and quick wins.
-
-### 7. DataScrub as Security Gate
-Always run DataScrub before processing client data through AI agents. PII detection and redaction must happen at the pipeline boundary, not as an afterthought.
-
-### 8. Effect Sizes Over P-Values
-Statistical significance is necessary but not sufficient. Always report effect sizes and practical significance alongside p-values. A statistically significant but trivially small effect is not actionable.
+### 6. State the Weak Joint in the Report
+Occupancy as a service-level proxy, the weekly band under a daily plan, the parameters that never
+learn — these go in the report, in the limitations section, every time. A model whose weaknesses
+are documented survives its first challenge. One whose weaknesses are discovered does not.

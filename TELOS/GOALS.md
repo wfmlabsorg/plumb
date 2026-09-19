@@ -2,44 +2,41 @@
 
 ## Primary Objectives
 
-### 1. Demonstrate a Working AI-Powered Consulting Pipeline
-- Ingest client data through structured ETL
-- Run multi-phase statistical analysis with full audit trails
-- Validate causal claims before escalating to recommendations
-- Compile executive-ready deliverables (Word, Excel, PowerPoint)
-- Complete entire pipeline from intake through delivery
+### 1. Ingest Any Planner Document Without Guessing
+- A mapping file per source shape, written once, reviewed by a human, reused thereafter
+- Sparse input is legal: model on what exists
+- Every unfilled column named in the gap register, never silently defaulted
+- Validation runs before any number is computed
 
-### 2. Enforce Methodological Rigor
-- No causal claims without Rung 2+ validation
-- Every finding mapped to CX, COST, or EX outcomes
-- Confidence levels explicitly stated on all findings
-- MethodologyChallenger QA gate before synthesis
-- Human checkpoints at every phase transition
+### 2. Produce a Deterministic Plan Anyone Can Audit
+- Required productive hours, delivered productive hours, gap in hours and FTE
+- Shrinkage applied once, on the supply side
+- Every formula stated; every number graded
+- Reproducible from the canonical CSVs alone
 
-### 3. Complete Engagements with Consistent Quality
-- Apply The Algorithm to every engagement
-- Follow project phase state machine (INTAKE → DISCOVERY → ANALYSIS → SYNTHESIS → DELIVERY → CLOSEOUT)
-- Use standardized templates for all deliverables
-- Maintain confidence ledger throughout engagement
-- Log all decisions with rationale
+### 3. Put an Honest Band Around It
+- Demand and supply drawn together so correlation survives
+- Coverage probability per week and across the horizon
+- A decision curve: how many more heads buys how much coverage
+- The interactive/deferrable split, so backlog is not mistaken for queue failure
 
-### 4. Generate Follow-On Engagement Opportunities
-- Identify adjacent problems during analysis
-- Document potential next SOWs in synthesis phase
-- Quantify opportunity cost of inaction where possible
+### 4. Learn From Actuals Without Re-Forecasting
+- Calibrate the forecast error ratio, not the forecast
+- Bayesian updating with a forgetting factor, so old regimes fade
+- Evidence discounted by effective sample size
+- Score every forecast once its week closes: PIT, CRPS, interval hit
 
-### 5. Build Reusable Analytical Templates
-- Extract patterns from completed engagements
-- Refine templates based on what works
-- Accumulate learnings in MEMORY system
-- Improve analytical quality with each engagement
+### 5. Deliver to Two Audiences in One Run
+- A WFM load file the downstream system can explode into intervals
+- An answer-first executive report where every number carries a grade
 
 ## Success Metrics
 
 | Metric | Target |
 |--------|--------|
-| Findings with "So What" mapping | 100% |
-| Findings with explicit confidence | 100% |
-| Causal claims with Rung 2+ backing | 100% |
-| Engagements completing all phases | 100% |
-| Learnings extracted per engagement | ≥ 3 |
+| Ungraded numbers reaching a report | 0 |
+| Planner documents ingestible without code changes | 100% (mapping only) |
+| Truth inside the P10–P90 band, on synthetic validation | ≥ 80% of weeks |
+| Unfilled canonical columns named in the gap register | 100% |
+| Staffing recommendations carrying a coverage probability | 100% |
+| Known limitations stated in the report rather than buried | 100% |
