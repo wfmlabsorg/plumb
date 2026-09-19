@@ -1,0 +1,31 @@
+# Mapping — Halcyon "Roster Summary" export
+#
+# Shrinkage arrives as a percentage of schedule; the canonical schema wants hours.
+# `percent_of` does that conversion against another column, so the source is never
+# edited and the arithmetic is visible in this file rather than buried in code.
+#
+# See context/plumb/MAPPING-CONVENTION.md
+
+source: roster-summary
+kind: supply
+file: roster-summary.csv
+header_row: 3
+
+columns:
+  date:                   "Date"
+  site:                   "Site"
+  cohort_id:              "Cohort"
+  heads_on_roll:          "Heads On Roll"
+  heads_scheduled:        "Heads Scheduled"
+  scheduled_hours:        "Sched Hrs"
+  productive_hours:       "Prod Hrs"
+  shrink_planned_hours:   {from: "Planned Shrink %",   transform: percent_of, of: "Sched Hrs"}
+  shrink_unplanned_hours: {from: "Unplanned Shrink %", transform: percent_of, of: "Sched Hrs"}
+  separations:            "Leavers"
+
+unmapped_ok:
+  - "Notes"      # free text; a Scout would read this, PLUMB does not
+
+# Deliberately NOT mapped, and therefore registered as gaps:
+#   weeks_since_graduation  - no cohort tenure in this export
+#   separations_voluntary   - the export does not split voluntary from involuntary

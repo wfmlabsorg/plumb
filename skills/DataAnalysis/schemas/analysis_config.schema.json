@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DataAnalysis Configuration",
+  "description": "Configuration schema for the DataAnalysis skill pipeline",
+  "type": "object",
+  "required": ["project", "source", "analysis", "output"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name (used in output filenames)"
+        },
+        "client": {
+          "type": "string",
+          "description": "Client name for report subtitle"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["directory"],
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Path to source data directory"
+        },
+        "file_pattern": {
+          "type": "string",
+          "default": "*.xlsx",
+          "description": "Glob pattern for source files"
+        }
+      }
+    },
+    "etl": {
+      "type": "object",
+      "properties": {
+        "template": {
+          "type": "string",
+          "enum": ["pivot_to_long", "multi_sheet_merge", "time_series_parse", "hierarchy_flatten"],
+          "default": "pivot_to_long",
+          "description": "ETL template to use"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Template-specific parameters"
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["type", "metric", "dimensions", "goals", "thresholds"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["deviation_analysis", "trend_analysis", "distribution_analysis", "comparison_analysis", "forecast_accuracy"],
+          "description": "Type of analysis to perform"
+        },
+        "metric": {
+          "type": "string",
+          "description": "Primary metric column to analyze"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Grouping dimensions for analysis"
+        },
+        "goals": {
+          "type": "object",
+          "required": ["default"],
+          "properties": {
+            "default": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Default goal value (0-1 scale)"
+            },
+            "overrides": {
+              "type": "object",
+              "additionalProperties": {"type": "number"},
+              "description": "Dimension-specific goal overrides"
+            }
+          }
+        },
+        "thresholds": {
+          "type": "object",
+          "required": ["significantly_above", "slightly_above", "within_range", "slightly_below", "significantly_below"],
+          "properties": {
+            "significantly_above": {
+              "type": "number",
+              "default": 10,
+              "description": "Points above goal for 'Significantly Above' category"
+            },
+            "slightly_above": {
+              "type": "number",
+              "default": 5,
+              "description": "Points above goal for 'Slightly Above' category"
+            },
+            "within_range": {
+              "type": "number",
+              "default": 0,
+              "description": "Center point for 'Within Range' category"
+            },
+            "slightly_below": {
+              "type": "number",
+              "default": -5,
+              "description": "Points below goal for 'Slightly Below' category"
+            },
+            "significantly_below": {
+              "type": "number",
+              "default": -10,
+              "description": "Points below goal for 'Significantly Below' category"
+            }
+          }
+        },
+        "special_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {"type": "string"},
+              "override_category": {"type": "string"}
+            }
+          },
+          "description": "Special categorization rules"
+        }
+      }
+    },
+    "qa": {
+      "type": "object",
+      "properties": {
+        "completeness": {
+          "type": "object",
+          "properties": {
+            "required_dimensions": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "date_continuity": {"type": "boolean", "default": false},
+            "no_null_metrics": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "ranges": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {"type": ["number", "null"]},
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "description": "Expected value ranges for metrics [min, max]"
+        }
+      }
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "template": {
+          "type": "string",
+          "enum": ["performance_analysis", "maturity_assessment", "gap_analysis", "executive_summary"],
+          "default": "performance_analysis"
+        },
+        "title": {"type": "string"},
+        "include_sections": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": ["directory"],
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Output directory for results"
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["md", "pdf", "docx"]
+          },
+          "default": ["md"]
+        }
+      }
+    }
+  }
+}

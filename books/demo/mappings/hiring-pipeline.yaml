@@ -1,0 +1,37 @@
+# Mapping — Halcyon "Recruiting Pipeline" ATS extract
+#
+# An .xlsx, not a CSV: a title block above the header, a named sheet, real Date
+# cells, human milestone labels and a formula column. All of it handled here
+# rather than by anyone editing the workbook.
+#
+# The `lookup` transform matters more than it looks. `event` is a canonical enum
+# matched exactly, so "Offer Accepted" would silently drop out of every rate that
+# depends on it. An unlisted label is an error, not a pass-through.
+#
+# See context/plumb/MAPPING-CONVENTION.md
+
+source: hiring-pipeline
+kind: events
+file: hiring-pipeline.xlsx
+sheet: "Pipeline Detail"
+header_row: 4
+
+columns:
+  date:          "Date"
+  cohort_id:     "Cohort"
+  count:         "Count"
+  planned_count: "Planned"
+  planned_date:  "Planned Date"
+  event:
+    from: "Milestone"
+    transform: lookup
+    values:
+      "Req Opened":     req_opened
+      "Offer Accepted": offer_accepted
+      "Class Started":  class_started
+      "Graduated":      graduated
+      "Withdrew":       withdrew
+
+unmapped_ok:
+  - "Conversion"   # a formula the recruiter added; PLUMB derives its own rates
+  - "Recruiter"
