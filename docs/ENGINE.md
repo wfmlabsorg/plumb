@@ -8,8 +8,8 @@ only exception.
 The staffing math — Erlang B/C/A, the achievable-occupancy curve, the two-sided correlated
 Monte Carlo, the Bayesian parameter updating and the intake validation — already exists, is
 already verified, and is already Python. It comes from the **CP-WFM-018 Probabilistic Staffing
-pack** at `~/cloud/projects/amexgbt/52-monte-carlo/`, which went through seven evaluation rounds
-before it was published.
+pack**, which went through seven evaluation rounds before it was published. The pack is not
+vendored here — only the four modules extracted from it are.
 
 Reimplementing it in TypeScript would create two sources of truth for the same arithmetic. The
 failure mode is not a crash, it is a silent divergence between the deterministic central case and
@@ -43,8 +43,13 @@ PLUMB's own code goes in new files beside them, never inside them.
 upstream:
 
 ```bash
-python3 Tools/engine/extract_from_pack.py
+python3 Tools/engine/extract_from_pack.py <pack-dir>
+#   or:  PLUMB_PACK_DIR=<pack-dir> python3 Tools/engine/extract_from_pack.py
 ```
+
+`<pack-dir>` is wherever your copy of the pack lives — the directory holding `03-simulator.md`
+and its siblings. There is deliberately no default: that path is a property of your machine, not
+of this repository.
 
 Each module doc carries exactly one ` ```python ` fence and the script asserts that. Two traps it
 handles, both found the hard way:

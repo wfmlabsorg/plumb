@@ -8,10 +8,24 @@ between the first ```python and its matching close fence. Two traps:
     extractor does not truncate it. Taking the FIRST close fence after the open
     is therefore correct: the literal never appears in the source.
 """
-import pathlib, sys
+import os
+import pathlib
+import sys
 
-PACK = pathlib.Path.home() / "cloud/projects/amexgbt/52-monte-carlo/pack"
-DEST = pathlib.Path.home() / "projects/plumb/Tools/engine"
+# Where your copy of the CP-WFM-018 pack lives. Set PLUMB_PACK_DIR, or pass the
+# directory as the first argument. There is no default: the pack is not part of
+# this repository and its location is a property of your machine, not of PLUMB.
+PACK = pathlib.Path(
+    sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PLUMB_PACK_DIR", ""))
+DEST = pathlib.Path(__file__).resolve().parent
+
+if not PACK.name:
+    sys.exit(
+        "usage: extract_from_pack.py <pack-dir>   (or set PLUMB_PACK_DIR)\n"
+        "  <pack-dir> is the CP-WFM-018 pack directory containing 03-simulator.md\n"
+        "  and its siblings. See docs/ENGINE.md.")
+if not PACK.is_dir():
+    sys.exit(f"pack directory not found: {PACK}")
 
 MODULES = {
     "03-simulator.md":  "mc_staffing.py",
