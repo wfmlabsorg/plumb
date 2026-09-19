@@ -17,9 +17,12 @@ plan = pd.read_csv(R / "books/demo/03-model/deterministic.csv", parse_dates=["da
 plan["day"] = (plan.date - pd.Timestamp("2026-06-01")).dt.days + 1
 
 _failures = []
+_total = 0
 
 
 def band(lbl, ok, detail):
+    global _total
+    _total += 1
     if not ok:
         _failures.append(lbl)
     print(f"  {'PASS' if ok else 'FAIL'}  {lbl:<52} {detail}")
@@ -76,8 +79,37 @@ band("effect 3 THE KEY TEST: required hours do NOT spike (supply break, not dema
      f"required {spike.required_h.mean():.0f}h vs {ref.required_h.mean():.0f}h "
      f"({spike.required_h.mean()/ref.required_h.mean():.2f}x)")
 
+# --- did the LEARNING recover the planted parameters? -----------------------
+# Only meaningful after `run.ts simulate --learn`. Skipped otherwise rather than
+# failed: an absent MODEL-STATE is a step not yet run, not a defect.
+import json, re
+state_file = R / "books/demo/03-model/MODEL-STATE.md"
+if state_file.exists():
+    m = re.search(r"```json\s*\n(.*?)\n```", state_file.read_text(), re.S)
+    st = json.loads(m.group(1))
+    post = st["posteriors"]
+    learned = [k for k, v in post.items() if not v.get("prior_only")]
+
+    def beta_mean(k):
+        p = post[k]
+        return p["a"] / (p["a"] + p["b"])
+
+    band("learning: CR[NORTH] posterior tracks the drift to 0.55",
+         abs(beta_mean("CR[NORTH]") - 0.55) < 0.03, f"{beta_mean('CR[NORTH]'):.4f}")
+    band("learning control: CR[SOUTH] posterior stays at 0.30",
+         abs(beta_mean("CR[SOUTH]") - 0.30) < 0.02, f"{beta_mean('CR[SOUTH]'):.4f}")
+    band("learning: pipeline parameters honestly remain prior_only",
+         all(post[k].get("prior_only") for k in
+             ("req_fill_prob", "class_fill_rate", "graduation_rate")),
+         "no pipeline_events.csv, so nothing to learn from")
+    n_expected = 10
+    band(f"learning: at least {n_expected} of 16 parameters left prior_only state",
+         len(learned) >= n_expected, f"{len(learned)} of {len(post)} learned")
+else:
+    print("  SKIP  learning checks — run `Tools/run.ts simulate --learn` first")
+
 print("=" * 78)
-print(f"  {7 - len(_failures)}/7 recovery checks pass")
+print(f"  {_total - len(_failures)}/{_total} checks pass")
 print()
 
 import sys

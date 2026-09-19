@@ -230,6 +230,374 @@ for mo, row in m.iterrows():
   if (!r.ok) process.exit(1);
 }
 
+// --------------------------------------------------------------------- simulate
+
+function simulate(flags: Record<string, string[]>) {
+  const book = one(flags, "book") ?? die("--book is required");
+  const draws = Number(one(flags, "draws", "20000"));
+  const learn = "learn" in flags;
+  const bookDir = join(ROOT, "books", book);
+  mkdirSync(join(bookDir, "03-model"), { recursive: true });
+
+  const canon = join(bookDir, "02-canonical").replace(/\\/g, "/");
+  const params = join(bookDir, "00-profile/params.yaml").replace(/\\/g, "/");
+  const model = join(bookDir, "03-model").replace(/\\/g, "/");
+
+  console.log(`\nSIMULATE — ${book} (${draws.toLocaleString()} draws, weekly)`);
+  console.log("=".repeat(64));
+
+  // In --learn mode this runs BEFORE the simulation, so the band is drawn from
+  // what was learned rather than from the priors. Simulating first and learning
+  // afterwards reports parameters as unobserved that the same run just observed.
+  const learnBlock = learn ? `
+print()
+print("    LEARNING WALK — replaying the book week by week")
+weeks = sorted(d.date.dt.to_period("W-SUN").unique())
+for i, w in enumerate(weeks):
+    as_of = str(w.end_time.date())
+
+    # 1. Absorb the week's evidence and score any forecast whose week has closed.
+    try:
+        out = C.run_cycle("${canon}", cfg, state_path=state_path, as_of=as_of, run_date=as_of)
+    except Exception as e:
+        print(f"      {as_of}  skipped: {type(e).__name__}: {e}")
+        continue
+    if out.get("halted"):
+        print(f"      {as_of}  HALTED: {out['validation_failures'][:1]}")
+        continue
+    # run_cycle returns the updated state but does not persist it -- the caller
+    # owns the file. Without this line every cycle restarts from the bootstrap
+    # and the model silently never learns anything.
+    C.write_state(out["state"], state_path, readout=f"cycle to {as_of}")
+
+    # 2. Issue a forecast for the weeks ahead, so the NEXT cycle has something to
+    #    score against. Scoring is what produces calibration; without an archived
+    #    forecast the model learns its parameters but never learns how well it is
+    #    doing, which is the half that tells you whether to trust the band.
+    if i + 1 < len(weeks):
+        st_i = C.read_state(state_path)
+        cfg_i = C.apply_posteriors(cfg, st_i)
+        cfg_i.pop("_posteriors_skipped", None)
+        res_i = M.run(cfg_i, n_draws=4000)
+        C.archive_forecast(st_i, res_i, issued=as_of,
+                           first_week_start=str(weeks[i + 1].start_time.date()))
+        C.write_state(st_i, state_path, readout=f"forecast issued {as_of}")
+state = C.read_state(state_path)
+learned = sorted(k for k, v in state["posteriors"].items() if not v.get("prior_only"))
+still   = sorted(k for k, v in state["posteriors"].items() if v.get("prior_only"))
+print(f"      revisions applied     {state['revision']}")
+print(f"      parameters learned    {len(learned)} of {len(state['posteriors'])}")
+for k in learned:
+    p = state["posteriors"][k]
+    if p.get("family") == "beta":
+        print(f"        {k:<22} mean {p['a']/(p['a']+p['b']):.4f}   n_obs {p.get('n_obs', 0)}")
+    elif p.get("family") == "nig":
+        print(f"        {k:<22} exp(mu) {np.exp(p['mu']):8.1f}   n_obs {p.get('n_obs', 0)}")
+    else:
+        print(f"        {k:<22} {p.get('family')}")
+if still:
+    print(f"      still prior_only      {len(still)}: {', '.join(still[:6])}")
+cal = state.get("calibration") or []
+print(f"      weeks scored          {len(cal)}")
+` : "";
+
+  const r = runPython(`
+import json, os, yaml, pandas as pd, numpy as np
+import mc_staffing as M, intake, cycle as C
+
+cfg = yaml.safe_load(open("${params}"))
+state_path = "${model}/MODEL-STATE.md"
+
+if not os.path.exists(state_path):
+    C.write_state(C.bootstrap_state(cfg), state_path)
+    print("    MODEL-STATE.md bootstrapped from the priors in params.yaml")
+
+state = C.read_state(state_path)
+d, sup, _ = intake.load_intake("${canon}", cfg)
+${learnBlock}
+# Re-read: the learning walk above (when it ran) has moved the posteriors.
+state = C.read_state(state_path)
+
+# Posteriors, where they exist, supersede params.yaml on the next run.
+cfg_run = C.apply_posteriors(cfg, state)
+skipped = cfg_run.pop("_posteriors_skipped", [])
+
+res   = M.run(cfg_run, n_draws=${draws})
+s     = res.summary()
+curve = M.coverage_curve(res)
+attr  = M.attribution(res)
+
+prior_only = sorted(k for k, v in state["posteriors"].items() if v.get("prior_only"))
+band_grade = "E" if prior_only else "C"
+
+print(f"    coverage, all weeks   {res.coverage():6.1%}   [{band_grade}]")
+print(f"    interactive lane      {res.coverage(lane='interactive'):6.1%}")
+print(f"    deferrable share      {s.deferrable_share.mean():6.1%}")
+worst = s.loc[s.coverage.idxmin()]
+print(f"    worst week            w{int(worst.week)}  coverage {worst.coverage:.0%}, P90 short {worst.shortfall_p90_fte:,.0f} FTE")
+print()
+print("    decision curve — what more heads buys:")
+for _, row in curve.iterrows():
+    if int(row.extra_heads) % 20 == 0 and row.extra_heads <= 80:
+        print(f"      +{int(row.extra_heads):3d} heads -> {row.coverage_all_weeks:5.1%} coverage")
+print()
+print(f"    parameters still prior_only: {len(prior_only)} of {len(state['posteriors'])}")
+if skipped:
+    print(f"    posteriors skipped (diagnostic only): {', '.join(skipped)}")
+print()
+print("    top variance contributors (screening only — confirm with pin_check):")
+for _, row in attr.head(5).iterrows():
+    print(f"      {str(row.iloc[0]):<28} {float(row.iloc[1]):6.1%}")
+
+json.dump({
+  "draws": ${draws},
+  "coverage_all": float(res.coverage()),
+  "coverage_interactive": float(res.coverage(lane="interactive")),
+  "band_grade": band_grade,
+  "prior_only": prior_only,
+  "calibration": state.get("calibration") or [],
+  "weekly": json.loads(s.to_json(orient="records")),
+  "decision_curve": json.loads(curve.to_json(orient="records")),
+  "attribution": json.loads(attr.to_json(orient="records")),
+}, open("${model}/simulation.json", "w"), indent=2)
+
+first_monday = pd.Timestamp(d.date.min()).normalize()
+C.archive_forecast(state, res, issued=str(pd.Timestamp(d.date.max()).date()),
+                   first_week_start=str(first_monday.date()))
+C.write_state(state, state_path)
+`);
+  console.log(r.out.trimEnd());
+  console.log(`\n  -> 03-model/simulation.json`);
+  console.log(`  -> 03-model/MODEL-STATE.md`);
+  console.log(`\n${"=".repeat(64)}`);
+  console.log(r.ok ? "  SIMULATE COMPLETE\n" : "  SIMULATE FAILED\n");
+  if (!r.ok) process.exit(1);
+}
+
+// ----------------------------------------------------------------------- report
+
+function report(flags: Record<string, string[]>) {
+  const book = one(flags, "book") ?? die("--book is required");
+  const bookDir = join(ROOT, "books", book);
+  mkdirSync(join(bookDir, "05-reports"), { recursive: true });
+  mkdirSync(join(bookDir, "exports"), { recursive: true });
+
+  const model = join(bookDir, "03-model").replace(/\\/g, "/");
+  const reports = join(bookDir, "05-reports").replace(/\\/g, "/");
+  const exports_ = join(bookDir, "exports").replace(/\\/g, "/");
+  const knowledge = join(bookDir, "04-knowledge").replace(/\\/g, "/");
+
+  console.log(`\nREPORT — ${book}\n${"=".repeat(64)}`);
+
+  const r = runPython(`
+import json, os, glob, re
+import pandas as pd, numpy as np
+
+plan = pd.read_csv("${model}/deterministic.csv", parse_dates=["date"])
+sim  = json.load(open("${model}/simulation.json")) if os.path.exists("${model}/simulation.json") else None
+
+day = plan.groupby("date").agg(required_h=("required_h","sum"),
+                               delivered_h=("delivered_h","sum"),
+                               gap_h=("gap_h","sum"),
+                               gap_fte=("gap_fte","sum")).reset_index()
+day["week"] = day.date.dt.to_period("W-SUN").astype(str)
+wk = day.groupby("week").agg(required_h=("required_h","sum"),
+                             delivered_h=("delivered_h","sum"),
+                             gap_h=("gap_h","sum"),
+                             gap_fte=("gap_fte","mean")).reset_index()
+
+worst_day  = day.loc[day.gap_h.idxmin()]
+worst_week = wk.loc[wk.gap_h.idxmin()]
+short_days = int((day.gap_h < 0).sum())
+grade      = plan.grade.mode()[0]
+band_grade = sim["band_grade"] if sim else "-"
+
+# ---- the WFM export -------------------------------------------------------
+# Daily. The receiving system applies its own interval curve; PLUMB does not do
+# intraday, and a fabricated interval profile would be treated downstream as
+# though it meant something.
+p90_uplift = 1.0
+if sim:
+    w = pd.DataFrame(sim["weekly"])
+    p90_uplift = float((w.demand_p90 / w.demand_p50).mean())
+
+exp = plan.groupby(["date","segment","channel"]).agg(
+        required_productive_h=("required_h","sum")).reset_index()
+exp["required_productive_h"] = exp.required_productive_h.round(2)
+hours_per_fte_day = 7.5 * (1 - 0.17)
+exp["required_fte"]     = (exp.required_productive_h / hours_per_fte_day).round(2)
+exp["required_fte_p90"] = (exp.required_fte * p90_uplift).round(2)
+exp["grade"] = grade
+exp["date"] = exp.date.dt.strftime("%Y-%m-%d")
+exp.to_csv("${exports_}/wfm-requirement.csv", index=False)
+
+# ---- knowledge notes ------------------------------------------------------
+notes = []
+for f in sorted(glob.glob("${knowledge}/*.md")):
+    txt = open(f).read()
+    g = re.search(r"^grade:\\s*(\\w+)", txt, re.M)
+    notes.append((os.path.basename(f), g.group(1) if g else "?"))
+
+prior_only = sim["prior_only"] if sim else []
+cov      = sim["coverage_all"] if sim else None
+cov_int  = sim["coverage_interactive"] if sim else None
+curve    = pd.DataFrame(sim["decision_curve"]) if sim else None
+
+# the decision: smallest head add that clears 80% coverage
+ask = None
+if curve is not None:
+    hit = curve[curve.coverage_all_weeks >= 0.80]
+    if len(hit):
+        ask = int(hit.iloc[0].extra_heads)
+
+title = (f"The plan is short on {short_days} of {len(day)} days [{grade}]"
+         f"{f'; coverage across the horizon is {cov:.0%} [{band_grade}]' if cov is not None else ''}.")
+
+L = []
+L.append(f"# Staffing status — ${book}")
+L.append("")
+L.append(f"_Issued {pd.Timestamp.today().date()} · covering "
+         f"{day.date.min().date()} to {day.date.max().date()}_")
+L.append("")
+L.append(f"**{title}**")
+L.append("")
+L.append("## What changed")
+L.append("")
+L.append(f"- Required productive hours moved from **{wk.iloc[0].required_h:,.0f} h** in the first "
+         f"week to **{wk.iloc[-1].required_h:,.0f} h** in the last [C]")
+d0, d1 = wk.iloc[0].delivered_h, wk.iloc[-1].delivered_h
+L.append(
+    f"- Delivered productive hours held flat at **{d0:,.0f} h** a week [M] — headcount never "
+    f"moved, so the entire swing is on the demand side"
+    if abs(d1 - d0) / d0 < 0.02 else
+    f"- Delivered productive hours moved from **{d0:,.0f} h** to **{d1:,.0f} h** [M]")
+L.append(f"- The book opened in surplus and closed in deficit; the crossover is week "
+         f"**{wk[wk.gap_h < 0].iloc[0].week if (wk.gap_h < 0).any() else 'n/a'}** [C]")
+L.append("")
+L.append("## Where we stand")
+L.append("")
+L.append("### Forecast")
+L.append("")
+L.append(f"The volume forecast in the planner runs below actuals. The calibrated forecast-error "
+         f"ratio is carried in \`MODEL-STATE.md\`; PLUMB does not re-forecast the business, it "
+         f"calibrates how wrong the supplied forecast usually is.")
+L.append("")
+L.append("### Staffing")
+L.append("")
+L.append(f"| | Hours | Grade |")
+L.append(f"|---|---|---|")
+L.append(f"| Required productive | {plan.required_h.sum():,.0f} | [{grade}] |")
+L.append(f"| Delivered productive | {plan.delivered_h.sum():,.0f} | [M] |")
+L.append(f"| **Gap** | **{plan.gap_h.sum():,.0f}** | [{grade}] |")
+L.append("")
+L.append(f"Worst day **{worst_day.date.date()}**: {abs(worst_day.gap_fte):,.0f} FTE short "
+         f"({abs(worst_day.gap_h):,.0f} h) [C]. Worst week **{worst_week.week}**: "
+         f"{abs(worst_week.gap_h):,.0f} h short [C].")
+L.append("")
+if cov is not None:
+    L.append("### The range")
+    L.append("")
+    odds = "fewer than 1 run in 100" if cov < 0.01 else f"about {cov*100:.0f} runs in 100"
+    L.append(f"Coverage across the horizon is **{cov:.1%}** [{band_grade}] — the plan holds in "
+             f"{odds}. The interactive lane alone covers **{cov_int:.1%}**.")
+    L.append("")
+    if cov_int - cov > 0.15:
+        L.append(f"**The gap between the lanes is the finding.** {cov_int:.0%} interactive against "
+                 f"{cov:.0%} pooled means much of the exposure is deferrable backlog rather than "
+                 f"queue failure, and those have different remedies: backlog absorbs overtime and "
+                 f"catches up, a queue failure does not.")
+    else:
+        L.append(f"**Both lanes are short** — {cov_int:.0%} interactive against {cov:.0%} pooled. "
+                 f"This is not a backlog problem that overtime absorbs. The queue itself is "
+                 f"uncovered, and only capacity closes it.")
+    L.append("")
+    L.append("The decision curve — what more heads buys:")
+    L.append("")
+    L.append("| Extra heads | Coverage |")
+    L.append("|---|---|")
+    for _, row in curve.iterrows():
+        if int(row.extra_heads) % 20 == 0 and row.extra_heads <= 80:
+            L.append(f"| +{int(row.extra_heads)} | {row.coverage_all_weeks:.1%} |")
+    L.append("")
+cal = sim.get("calibration") if sim else None
+if cal:
+    cdf = pd.DataFrame(cal)
+    req = cdf[cdf.quantity == "required_productive_hours"] if "quantity" in cdf else cdf
+    if len(req):
+        hit = req.hit80.mean() if "hit80" in req else float("nan")
+        L.append("### Calibration")
+        L.append("")
+        L.append(f"{len(req)} closed week(s) scored. The 80% interval contained the actual "
+                 f"**{hit:.0%}** of the time [M]. A well-calibrated band sits near 80%: "
+                 f"materially above means the band is too wide to be useful, materially below "
+                 f"means it is too narrow to be trusted.")
+        L.append("")
+
+L.append("## Decision requested")
+L.append("")
+if ask is not None:
+    L.append(f"**Approve {ask} incremental heads.** Owner: the capacity owner for ${book}. "
+             f"Date: within two weeks. Without a decision the book runs at {cov:.0%} coverage "
+             f"and the shortfall compounds — it is already the largest in the final week.")
+else:
+    L.append("**None.** This is an update, not an ask.")
+L.append("")
+L.append("## What would change the answer")
+L.append("")
+L.append(f"- **Measuring occupancy.** It is the largest single assumption in the requirement and "
+         f"it currently rests on the Erlang curve rather than this operation's own achieved "
+         f"occupancy.")
+if sim:
+    top = pd.DataFrame(sim["attribution"]).head(3)
+    names = ", ".join(f"\`{str(r.iloc[0])}\` ({float(r.iloc[1]):.0%})" for _, r in top.iterrows())
+    L.append(f"- **The three largest variance contributors** are {names}. These are a "
+             f"rank-correlation screen, not effect estimates; confirm with \`pin_check()\` "
+             f"before commissioning any measurement work.")
+L.append(f"- **A pipeline feed.** Without \`pipeline_events.csv\` the hiring pipeline is entirely "
+         f"prior, so the supply side of the band is assumption, not observation.")
+L.append("")
+L.append("## Limitations")
+L.append("")
+if prior_only:
+    L.append(f"- **{len(prior_only)} of the model's parameters have never seen an observation** "
+             f"({', '.join(prior_only)}). The band is graded **[{band_grade}]** for that reason: "
+             f"it reflects what was assumed as much as what was measured.")
+L.append(f"- **Occupancy as a service-level proxy is this model's weakest joint.** Achievable "
+         f"occupancy rises with pooled load — about 83% at 30 erlangs and 97% at 480 — so a "
+         f"fixed value exaggerates both tails. This run uses the Erlang curve.")
+L.append(f"- **The band is weekly; the plan is daily.** The supply side is a cohort pipeline "
+         f"(requisition, time to fill, class, training, graduation, ramp) and those are weekly "
+         f"mechanisms. A daily band would be false precision.")
+L.append(f"- **Seven simulation parameters have no extractor** and never learn from actuals. See "
+         f"\`docs/KNOWN-GAPS.md\`. They are not calibrated and are not described as such.")
+L.append(f"- **No intraday.** The WFM export is daily; the receiving system applies its own "
+         f"interval curve.")
+if notes:
+    L.append("")
+    L.append("## Knowledge applied")
+    L.append("")
+    for n, g in notes:
+        L.append(f"- \`{n}\` [{g}]")
+L.append("")
+open("${reports}/staffing-status.md", "w").write("\\n".join(L) + "\\n")
+
+print(f"    title       {title}")
+print(f"    decision    {'approve ' + str(ask) + ' heads' if ask is not None else 'none — update only'}")
+print(f"    grades      plan [{grade}] · band [{band_grade}]")
+print(f"    limitations {5 if prior_only else 4} stated")
+print(f"    knowledge   {len(notes)} note(s) applied")
+print(f"    export      {len(exp)} rows, P90 uplift {p90_uplift:.2f}x")
+`);
+  console.log(r.out.trimEnd());
+  console.log(`\n  -> 05-reports/staffing-status.md`);
+  console.log(`  -> exports/wfm-requirement.csv`);
+  console.log(`\n  ** CHECKPOINT 2 ** — review before this goes out.`);
+  console.log(`     See context/plumb/HUMAN-CHECKPOINTS.md`);
+  console.log(`\n${"=".repeat(64)}`);
+  console.log(r.ok ? "  REPORT COMPLETE\n" : "  REPORT FAILED\n");
+  if (!r.ok) process.exit(1);
+}
+
 // ------------------------------------------------------------------------ stubs
 
 function notYet(cmd: string): never {
@@ -259,7 +627,7 @@ const { cmd, flags } = parseArgs(process.argv.slice(2));
 switch (cmd) {
   case "ingest":   ingest(flags); break;
   case "model":    model(flags); break;
-  case "simulate": notYet("simulate"); break;
-  case "report":   notYet("report"); break;
+  case "simulate": simulate(flags); break;
+  case "report":   report(flags); break;
   default:         console.log(USAGE); process.exit(cmd ? 1 : 0);
 }
