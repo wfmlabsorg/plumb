@@ -1,0 +1,32 @@
+# Mapping — Halcyon "Daily Planner (MTD)" export
+#
+# The document carries two title lines and a blank before the real header, AHT in
+# minutes, occupancy and service level as percentages, and thousands separators on
+# the volume columns. None of that is unusual; all of it is handled here rather
+# than by hand-editing the source.
+#
+# See context/plumb/MAPPING-CONVENTION.md
+
+source: planner-mtd
+kind: demand
+file: planner-mtd.csv
+header_row: 4
+
+columns:
+  date:                  "Date"
+  segment:               "Region"
+  channel:               "Channel"
+  transactions:          {from: "Bookings",    transform: strip_commas}
+  transactions_forecast: {from: "Fcst Calls",  transform: strip_commas}
+  contacts_offered:      "Offered"
+  contacts_handled:      "Answered"
+  aht_seconds:           {from: "AHT (min)",   transform: minutes_to_seconds}
+  concurrency_effective: "Conc"
+  items_resolved:        "Resolved"
+  productive_hours:      "Prod Hrs"
+  occupancy_achieved:    {from: "Occ %",       transform: percent_to_fraction}
+  service_level:         {from: "SL %",        transform: percent_to_fraction}
+
+unmapped_ok:
+  - "RAG"        # a derived status flag; PLUMB recomputes service level itself
+  - "Owner"      # who maintains the sheet

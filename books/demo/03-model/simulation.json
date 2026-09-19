@@ -1,0 +1,699 @@
+{
+  "draws": 20000,
+  "coverage_all": 0.0001,
+  "coverage_interactive": 0.0153,
+  "band_grade": "C",
+  "prior_only": [],
+  "calibration": [
+    {
+      "actual": 2607.52,
+      "crps": 153.69,
+      "hit80": true,
+      "issued": "2026-06-07",
+      "pit": 0.1401,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W24"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 324.8,
+      "hit80": false,
+      "issued": "2026-06-07",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W24"
+    },
+    {
+      "actual": 2579.07,
+      "crps": 177.62,
+      "hit80": true,
+      "issued": "2026-06-07",
+      "pit": 0.115,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W25"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 339.13,
+      "hit80": false,
+      "issued": "2026-06-07",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W25"
+    },
+    {
+      "actual": 2638.01,
+      "crps": 151.38,
+      "hit80": true,
+      "issued": "2026-06-07",
+      "pit": 0.1486,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W26"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 353.16,
+      "hit80": false,
+      "issued": "2026-06-07",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W26"
+    },
+    {
+      "actual": 2687.22,
+      "crps": 119.01,
+      "hit80": true,
+      "issued": "2026-06-07",
+      "pit": 0.2068,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W27"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 366.99,
+      "hit80": false,
+      "issued": "2026-06-07",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W27"
+    },
+    {
+      "actual": 2776.04,
+      "crps": 142.71,
+      "hit80": true,
+      "issued": "2026-06-14",
+      "pit": 0.2009,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W28"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 353.51,
+      "hit80": false,
+      "issued": "2026-06-14",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W28"
+    },
+    {
+      "actual": 3077.03,
+      "crps": 78.53,
+      "hit80": true,
+      "issued": "2026-06-21",
+      "pit": 0.5795,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W29"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 355.22,
+      "hit80": false,
+      "issued": "2026-06-21",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W29"
+    },
+    {
+      "actual": 3250.28,
+      "crps": 134.9,
+      "hit80": true,
+      "issued": "2026-06-28",
+      "pit": 0.7492,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W30"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 357.72,
+      "hit80": false,
+      "issued": "2026-06-28",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W30"
+    },
+    {
+      "actual": 3419.45,
+      "crps": 233.17,
+      "hit80": true,
+      "issued": "2026-07-05",
+      "pit": 0.8577,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W31"
+    },
+    {
+      "actual": 2362.73,
+      "crps": 71.84,
+      "hit80": true,
+      "issued": "2026-07-05",
+      "pit": 0.841,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W31"
+    },
+    {
+      "actual": 3455.2,
+      "crps": 250.77,
+      "hit80": true,
+      "issued": "2026-07-12",
+      "pit": 0.8698,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W32"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 358.8,
+      "hit80": false,
+      "issued": "2026-07-12",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W32"
+    },
+    {
+      "actual": 3594.75,
+      "crps": 351.1,
+      "hit80": false,
+      "issued": "2026-07-19",
+      "pit": 0.9293,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W33"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 354.77,
+      "hit80": false,
+      "issued": "2026-07-19",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W33"
+    },
+    {
+      "actual": 3615.88,
+      "crps": 360.06,
+      "hit80": false,
+      "issued": "2026-07-26",
+      "pit": 0.9317,
+      "quantity": "required_productive_hours",
+      "target_week": "2026-W34"
+    },
+    {
+      "actual": 2670.53,
+      "crps": 353.39,
+      "hit80": false,
+      "issued": "2026-07-26",
+      "pit": 1.0,
+      "quantity": "available_productive_hours",
+      "target_week": "2026-W34"
+    }
+  ],
+  "weekly": [
+    {
+      "week": 0,
+      "demand_p10": 2694.491579304,
+      "demand_p50": 3053.1177819996,
+      "demand_p90": 3520.0971804358,
+      "supply_p50": 2302.1037556613,
+      "coverage": 0.00355,
+      "coverage_interactive": 0.10625,
+      "deferrable_share": 0.1270445877,
+      "shortfall_p50_hrs": 760.3529146845,
+      "shortfall_p90_hrs": 1255.8434746761,
+      "shortfall_p50_fte": 25.2026636725,
+      "shortfall_p90_fte": 42.6939640642
+    },
+    {
+      "week": 1,
+      "demand_p10": 2694.4661869363,
+      "demand_p50": 3054.0263420103,
+      "demand_p90": 3526.3001943705,
+      "supply_p50": 2289.7164847702,
+      "coverage": 0.003,
+      "coverage_interactive": 0.09735,
+      "deferrable_share": 0.1270439242,
+      "shortfall_p50_hrs": 778.1890496175,
+      "shortfall_p90_hrs": 1267.0868372026,
+      "shortfall_p50_fte": 25.7065327844,
+      "shortfall_p90_fte": 43.0356759711
+    },
+    {
+      "week": 2,
+      "demand_p10": 2714.9275233089,
+      "demand_p50": 3081.4636563791,
+      "demand_p90": 3555.2371331014,
+      "supply_p50": 2277.5994024893,
+      "coverage": 0.0022,
+      "coverage_interactive": 0.07915,
+      "deferrable_share": 0.1271805976,
+      "shortfall_p50_hrs": 816.8265970782,
+      "shortfall_p90_hrs": 1309.2082080788,
+      "shortfall_p50_fte": 26.9569534803,
+      "shortfall_p90_fte": 44.653134386
+    },
+    {
+      "week": 3,
+      "demand_p10": 2715.7894186718,
+      "demand_p50": 3081.9486801906,
+      "demand_p90": 3549.7651721697,
+      "supply_p50": 2265.4990661349,
+      "coverage": 0.0019,
+      "coverage_interactive": 0.0731,
+      "deferrable_share": 0.1271684248,
+      "shortfall_p50_hrs": 829.7455071073,
+      "shortfall_p90_hrs": 1323.6606476251,
+      "shortfall_p50_fte": 27.366458341,
+      "shortfall_p90_fte": 45.0015340129
+    },
+    {
+      "week": 4,
+      "demand_p10": 2736.7495155334,
+      "demand_p50": 3110.1609338837,
+      "demand_p90": 3586.809648501,
+      "supply_p50": 2253.4333200614,
+      "coverage": 0.0014,
+      "coverage_interactive": 0.0585,
+      "deferrable_share": 0.1273080723,
+      "shortfall_p50_hrs": 868.5873704271,
+      "shortfall_p90_hrs": 1363.9100168026,
+      "shortfall_p50_fte": 28.6252752204,
+      "shortfall_p90_fte": 46.3524765641
+    },
+    {
+      "week": 5,
+      "demand_p10": 2736.939418558,
+      "demand_p50": 3111.22429839,
+      "demand_p90": 3584.7084777673,
+      "supply_p50": 2241.7959013561,
+      "coverage": 0.001,
+      "coverage_interactive": 0.0523,
+      "deferrable_share": 0.1273106231,
+      "shortfall_p50_hrs": 880.8346661919,
+      "shortfall_p90_hrs": 1376.9228284413,
+      "shortfall_p50_fte": 29.0872233566,
+      "shortfall_p90_fte": 46.8113037585
+    },
+    {
+      "week": 6,
+      "demand_p10": 2758.9748410341,
+      "demand_p50": 3140.803936891,
+      "demand_p90": 3617.7485436179,
+      "supply_p50": 2230.2418402645,
+      "coverage": 0.0005,
+      "coverage_interactive": 0.04165,
+      "deferrable_share": 0.1274384442,
+      "shortfall_p50_hrs": 922.1619902479,
+      "shortfall_p90_hrs": 1421.4479747601,
+      "shortfall_p50_fte": 30.3612464038,
+      "shortfall_p90_fte": 48.1980488497
+    },
+    {
+      "week": 7,
+      "demand_p10": 2759.0382455219,
+      "demand_p50": 3143.8844488577,
+      "demand_p90": 3611.5021940936,
+      "supply_p50": 2218.1261178622,
+      "coverage": 0.00085,
+      "coverage_interactive": 0.03905,
+      "deferrable_share": 0.1274289325,
+      "shortfall_p50_hrs": 936.3701048427,
+      "shortfall_p90_hrs": 1427.0506420816,
+      "shortfall_p50_fte": 30.7812598746,
+      "shortfall_p90_fte": 48.4884066057
+    },
+    {
+      "week": 8,
+      "demand_p10": 2781.9692033828,
+      "demand_p50": 3169.5674726973,
+      "demand_p90": 3650.3573446941,
+      "supply_p50": 2206.2757900818,
+      "coverage": 0.0004,
+      "coverage_interactive": 0.03065,
+      "deferrable_share": 0.1275616789,
+      "shortfall_p50_hrs": 972.4907830934,
+      "shortfall_p90_hrs": 1474.6458341576,
+      "shortfall_p50_fte": 32.0561581534,
+      "shortfall_p90_fte": 50.0682805269
+    },
+    {
+      "week": 9,
+      "demand_p10": 2781.5890505726,
+      "demand_p50": 3170.4287947038,
+      "demand_p90": 3644.3491579138,
+      "supply_p50": 2194.4757955054,
+      "coverage": 0.00035,
+      "coverage_interactive": 0.02715,
+      "deferrable_share": 0.1275522751,
+      "shortfall_p50_hrs": 985.2019246534,
+      "shortfall_p90_hrs": 1486.9580051661,
+      "shortfall_p50_fte": 32.4624748859,
+      "shortfall_p90_fte": 50.3090746842
+    },
+    {
+      "week": 10,
+      "demand_p10": 2802.5217328186,
+      "demand_p50": 3199.5253438147,
+      "demand_p90": 3671.6346041756,
+      "supply_p50": 2214.5624219264,
+      "coverage": 0.0006,
+      "coverage_interactive": 0.03385,
+      "deferrable_share": 0.127678082,
+      "shortfall_p50_hrs": 989.3788525627,
+      "shortfall_p90_hrs": 1496.0776772822,
+      "shortfall_p50_fte": 32.6063144712,
+      "shortfall_p90_fte": 50.9031433028
+    },
+    {
+      "week": 11,
+      "demand_p10": 2800.9303102167,
+      "demand_p50": 3202.1884982108,
+      "demand_p90": 3669.6834427934,
+      "supply_p50": 2261.3531609147,
+      "coverage": 0.0016,
+      "coverage_interactive": 0.05355,
+      "deferrable_share": 0.1276717473,
+      "shortfall_p50_hrs": 945.4361828998,
+      "shortfall_p90_hrs": 1458.4733834477,
+      "shortfall_p50_fte": 31.1254324379,
+      "shortfall_p90_fte": 49.5386159942
+    }
+  ],
+  "decision_curve": [
+    {
+      "extra_heads": 0,
+      "coverage_all_weeks": 0.0001,
+      "coverage_worst_week": 0.00035,
+      "coverage_mean_week": 0.0014458333
+    },
+    {
+      "extra_heads": 5,
+      "coverage_all_weeks": 0.001,
+      "coverage_worst_week": 0.0028,
+      "coverage_mean_week": 0.0098041667
+    },
+    {
+      "extra_heads": 10,
+      "coverage_all_weeks": 0.0079,
+      "coverage_worst_week": 0.01705,
+      "coverage_mean_week": 0.037525
+    },
+    {
+      "extra_heads": 15,
+      "coverage_all_weeks": 0.03305,
+      "coverage_worst_week": 0.05725,
+      "coverage_mean_week": 0.1054333333
+    },
+    {
+      "extra_heads": 20,
+      "coverage_all_weeks": 0.09395,
+      "coverage_worst_week": 0.1431,
+      "coverage_mean_week": 0.2198458333
+    },
+    {
+      "extra_heads": 25,
+      "coverage_all_weeks": 0.1979,
+      "coverage_worst_week": 0.2729,
+      "coverage_mean_week": 0.36575
+    },
+    {
+      "extra_heads": 30,
+      "coverage_all_weeks": 0.333,
+      "coverage_worst_week": 0.41925,
+      "coverage_mean_week": 0.5184541667
+    },
+    {
+      "extra_heads": 35,
+      "coverage_all_weeks": 0.4823,
+      "coverage_worst_week": 0.56915,
+      "coverage_mean_week": 0.65985
+    },
+    {
+      "extra_heads": 40,
+      "coverage_all_weeks": 0.6279,
+      "coverage_worst_week": 0.69785,
+      "coverage_mean_week": 0.7780708333
+    },
+    {
+      "extra_heads": 45,
+      "coverage_all_weeks": 0.75305,
+      "coverage_worst_week": 0.812,
+      "coverage_mean_week": 0.8666166667
+    },
+    {
+      "extra_heads": 50,
+      "coverage_all_weeks": 0.8501,
+      "coverage_worst_week": 0.8891,
+      "coverage_mean_week": 0.9257416667
+    },
+    {
+      "extra_heads": 55,
+      "coverage_all_weeks": 0.91385,
+      "coverage_worst_week": 0.93735,
+      "coverage_mean_week": 0.9590708333
+    },
+    {
+      "extra_heads": 60,
+      "coverage_all_weeks": 0.9523,
+      "coverage_worst_week": 0.9656,
+      "coverage_mean_week": 0.9784875
+    },
+    {
+      "extra_heads": 65,
+      "coverage_all_weeks": 0.9747,
+      "coverage_worst_week": 0.98205,
+      "coverage_mean_week": 0.9895375
+    },
+    {
+      "extra_heads": 70,
+      "coverage_all_weeks": 0.98735,
+      "coverage_worst_week": 0.992,
+      "coverage_mean_week": 0.9954
+    },
+    {
+      "extra_heads": 75,
+      "coverage_all_weeks": 0.99465,
+      "coverage_worst_week": 0.9965,
+      "coverage_mean_week": 0.9979375
+    },
+    {
+      "extra_heads": 80,
+      "coverage_all_weeks": 0.99745,
+      "coverage_worst_week": 0.99835,
+      "coverage_mean_week": 0.99905
+    },
+    {
+      "extra_heads": 85,
+      "coverage_all_weeks": 0.99875,
+      "coverage_worst_week": 0.99925,
+      "coverage_mean_week": 0.9995416667
+    },
+    {
+      "extra_heads": 90,
+      "coverage_all_weeks": 0.9994,
+      "coverage_worst_week": 0.9996,
+      "coverage_mean_week": 0.9997833333
+    },
+    {
+      "extra_heads": 95,
+      "coverage_all_weeks": 0.99975,
+      "coverage_worst_week": 0.99985,
+      "coverage_mean_week": 0.9999083333
+    },
+    {
+      "extra_heads": 100,
+      "coverage_all_weeks": 0.9999,
+      "coverage_worst_week": 0.9999,
+      "coverage_mean_week": 0.9999416667
+    },
+    {
+      "extra_heads": 105,
+      "coverage_all_weeks": 0.99995,
+      "coverage_worst_week": 0.99995,
+      "coverage_mean_week": 0.99995
+    },
+    {
+      "extra_heads": 110,
+      "coverage_all_weeks": 0.99995,
+      "coverage_worst_week": 0.99995,
+      "coverage_mean_week": 0.9999708333
+    },
+    {
+      "extra_heads": 115,
+      "coverage_all_weeks": 1.0,
+      "coverage_worst_week": 1.0,
+      "coverage_mean_week": 1.0
+    },
+    {
+      "extra_heads": 120,
+      "coverage_all_weeks": 1.0,
+      "coverage_worst_week": 1.0,
+      "coverage_mean_week": 1.0
+    }
+  ],
+  "attribution": [
+    {
+      "input": "AHT[voice]",
+      "rho": 0.6629363534,
+      "rho2": 0.4394846086,
+      "endogenous": false,
+      "share": 0.5033770278
+    },
+    {
+      "input": "txn[NORTH]",
+      "rho": 0.2899852794,
+      "rho2": 0.0840914622,
+      "endogenous": false,
+      "share": 0.0963167071
+    },
+    {
+      "input": "txn[SOUTH]",
+      "rho": 0.270653441,
+      "rho2": 0.0732532851,
+      "endogenous": false,
+      "share": 0.0839028722
+    },
+    {
+      "input": "shrink_planned",
+      "rho": 0.2641231466,
+      "rho2": 0.0697610366,
+      "endogenous": false,
+      "share": 0.0799029194
+    },
+    {
+      "input": "conc[chat]",
+      "rho": -0.2473798995,
+      "rho2": 0.0611968147,
+      "endogenous": false,
+      "share": 0.070093628
+    },
+    {
+      "input": "CR[SOUTH]",
+      "rho": 0.2031439842,
+      "rho2": 0.0412674783,
+      "endogenous": false,
+      "share": 0.0472669581
+    },
+    {
+      "input": "shrink_unplanned",
+      "rho": 0.1804283983,
+      "rho2": 0.0325544069,
+      "endogenous": false,
+      "share": 0.0372871775
+    },
+    {
+      "input": "CR[NORTH]",
+      "rho": 0.1676359568,
+      "rho2": 0.028101814,
+      "endogenous": false,
+      "share": 0.0321872651
+    },
+    {
+      "input": "tph[email]",
+      "rho": -0.1099806845,
+      "rho2": 0.012095751,
+      "endogenous": false,
+      "share": 0.0138542353
+    },
+    {
+      "input": "fcst_err[NORTH]",
+      "rho": 0.092120008,
+      "rho2": 0.0084860959,
+      "endogenous": false,
+      "share": 0.0097198073
+    },
+    {
+      "input": "fcst_err[SOUTH]",
+      "rho": 0.0911476743,
+      "rho2": 0.0083078985,
+      "endogenous": false,
+      "share": 0.0095157036
+    },
+    {
+      "input": "attrition_tenured",
+      "rho": 0.0791059687,
+      "rho2": 0.0062577543,
+      "endogenous": false,
+      "share": 0.0071675087
+    },
+    {
+      "input": "AHT[chat]",
+      "rho": 0.0555856865,
+      "rho2": 0.0030897685,
+      "endogenous": false,
+      "share": 0.0035389601
+    },
+    {
+      "input": "time_to_fill_wks",
+      "rho": 0.0532632322,
+      "rho2": 0.0028369719,
+      "endogenous": false,
+      "share": 0.0032494118
+    },
+    {
+      "input": "split[NORTH,email]",
+      "rho": -0.030793534,
+      "rho2": 0.0009482417,
+      "endogenous": false,
+      "share": 0.0010860974
+    },
+    {
+      "input": "split[SOUTH,voice]",
+      "rho": 0.0223249126,
+      "rho2": 0.0004984017,
+      "endogenous": false,
+      "share": 0.0005708595
+    },
+    {
+      "input": "split[SOUTH,email]",
+      "rho": -0.0210230008,
+      "rho2": 0.0004419666,
+      "endogenous": false,
+      "share": 0.0005062198
+    },
+    {
+      "input": "split[NORTH,voice]",
+      "rho": 0.0168142866,
+      "rho2": 0.0002827202,
+      "endogenous": false,
+      "share": 0.0003238222
+    },
+    {
+      "input": "class_fill_rate",
+      "rho": 0.0068988982,
+      "rho2": 4.75948e-05,
+      "endogenous": false,
+      "share": 5.45141e-05
+    },
+    {
+      "input": "split[SOUTH,chat]",
+      "rho": -0.0062819786,
+      "rho2": 3.94633e-05,
+      "endogenous": false,
+      "share": 4.52004e-05
+    },
+    {
+      "input": "graduation_rate",
+      "rho": 0.0039026518,
+      "rho2": 1.52307e-05,
+      "endogenous": false,
+      "share": 1.74449e-05
+    },
+    {
+      "input": "split[NORTH,chat]",
+      "rho": 0.0036974102,
+      "rho2": 1.36708e-05,
+      "endogenous": false,
+      "share": 1.56583e-05
+    },
+    {
+      "input": "req_fill_prob",
+      "rho": 3.20578e-05,
+      "rho2": 1e-09,
+      "endogenous": false,
+      "share": 1.2e-09
+    },
+    {
+      "input": "ramp_wk1",
+      "rho": null,
+      "rho2": null,
+      "endogenous": false,
+      "share": null
+    }
+  ]
+}

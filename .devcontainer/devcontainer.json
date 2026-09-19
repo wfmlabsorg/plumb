@@ -1,0 +1,25 @@
+{
+  "name": "PLUMB - Deterministic + Probabilistic Staffing Engine",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+
+  "postCreateCommand": "bash .devcontainer/setup.sh 2>&1 | tee /tmp/setup.log",
+
+  "containerEnv": {
+    "DA": "PLUMB",
+    "PAI_DIR": "/home/vscode/.claude",
+    "PAI_SOURCE_APP": "PLUMB",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CODESPACE": "true",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  "remoteUser": "vscode"
+}

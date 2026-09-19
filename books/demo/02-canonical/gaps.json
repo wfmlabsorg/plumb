@@ -1,0 +1,14 @@
+[
+  {
+    "input": "weeks_since_graduation",
+    "status": "absent",
+    "treatment": "left empty; not modelled",
+    "source": "roster-summary"
+  },
+  {
+    "input": "separations_voluntary",
+    "status": "absent",
+    "treatment": "left empty; not modelled",
+    "source": "roster-summary"
+  }
+]
