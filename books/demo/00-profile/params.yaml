@@ -1,0 +1,65 @@
+# PLUMB — books/demo parameters
+# Priors for the simulation. Every rate is a mean plus a 90% interval; every
+# positive unbounded quantity is a 90% interval alone. Once a posterior exists,
+# MODEL-STATE.md supersedes what is written here.
+#
+# NOTE: these are PRIORS, not measurements. Anything sourced here is [E] at best
+# until the model has observed it. See context/plumb/GRADES.md.
+
+horizon_weeks: 12
+
+channels:
+  voice:
+    kind: interactive
+    aht_seconds: {ci: [380, 620]}
+    concurrency: 1.0
+    occupancy:
+      kind: erlang_curve
+      target_sl: 0.80
+      asa_seconds: 20
+      operating_hours_per_week: 105
+      spread: 0.04
+  chat:
+    kind: interactive
+    aht_seconds: {ci: [460, 600]}
+    concurrency: {ci: [1.4, 1.9]}
+    occupancy:
+      kind: erlang_curve
+      target_sl: 0.80
+      asa_seconds: 30
+      operating_hours_per_week: 105
+      spread: 0.05
+  email:
+    kind: deferrable
+    items_per_productive_hour: {ci: [9.0, 13.0]}
+
+segments:
+  NORTH:
+    transactions_per_week: [16000, 19000, 23000]
+    weekly_index: [1.00, 1.00, 1.01, 1.01, 1.02, 1.02, 1.03, 1.03, 1.04, 1.04, 1.05, 1.05]
+    forecast_error: {ci: [0.98, 1.08]}
+    forecast_error_weekly: {ci: [0.94, 1.06]}
+    contact_rate: {mean: 0.42, ci: [0.36, 0.50]}
+    channel_split: {voice: 45, chat: 35, email: 20}
+  SOUTH:
+    transactions_per_week: [27000, 32000, 38000]
+    weekly_index: [1.00, 1.00, 1.01, 1.01, 1.02, 1.02, 1.03, 1.03, 1.04, 1.04, 1.05, 1.05]
+    forecast_error: {ci: [0.98, 1.08]}
+    forecast_error_weekly: {ci: [0.94, 1.06]}
+    contact_rate: {mean: 0.30, ci: [0.26, 0.35]}
+    channel_split: {voice: 45, chat: 35, email: 20}
+
+supply:
+  starting_productive_heads: 76
+  scheduled_hours_per_head: 37.5
+  ramp_curve: [0.35, 0.55, 0.75, 0.90, 1.0]
+  early_attrition_weekly: [0.03, 0.03, 0.02, 0.02, 0.01]
+  tenured_attrition_weekly: {mean: 0.006, ci: [0.003, 0.011]}
+  shrinkage_planned: {mean: 0.12, ci: [0.09, 0.16]}
+  shrinkage_unplanned: {mean: 0.05, ci: [0.03, 0.09]}
+  requisition_fill_prob: {mean: 0.70, ci: [0.55, 0.85]}
+  time_to_fill_weeks: {ci: [3.0, 8.0]}
+  class_fill_rate: {mean: 0.85, ci: [0.70, 0.95]}
+  graduation_rate: {mean: 0.88, ci: [0.78, 0.95]}
+  training_weeks: 4
+  class_plan: []
