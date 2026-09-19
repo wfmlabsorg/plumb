@@ -332,7 +332,12 @@ supply:
   class_fill_rate: {mean: 0.85, ci: [0.70, 0.95]}
   graduation_rate: {mean: 0.88, ci: [0.78, 0.95]}
   training_weeks: 4
-  class_plan: []
+  # The three cohorts in sim/generate-pipeline.ts, as the plan of record.
+  # lead_weeks is requisition-open to class-start.
+  class_plan:
+    - {planned_start_week: 6,  seats_planned: 20, requisitions_opened: 40, lead_weeks: 4}
+    - {planned_start_week: 8,  seats_planned: 30, requisitions_opened: 50, lead_weeks: 4}
+    - {planned_start_week: 10, seats_planned: 20, requisitions_opened: 35, lead_weeks: 4}
 `;
 writeFileSync(join(PROFILE, "params.yaml"), paramsYaml);
 

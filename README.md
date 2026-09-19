@@ -79,6 +79,7 @@ INGEST → MODEL → REPORT.
 bun install
 
 bun run sim/generate.ts                            # build the synthetic world (10 checks)
+bun run sim/generate-pipeline.ts                   # the hiring pipeline, as .xlsx
 bun run Tools/run.ts ingest   --book demo          # planner docs -> canonical, validated
 bun run Tools/run.ts model    --book demo          # the deterministic daily plan
 bun run Tools/run.ts simulate --book demo --learn  # learn from actuals, then draw the band
@@ -92,12 +93,20 @@ it, update the posteriors, issue the next forecast. Without it the simulation ru
 
 ## The worked example
 
-`books/demo/` carries a synthetic 12-week world — 2 segments, 3 channels, one cohort — with three
-planted mechanisms and a ground truth in `sim/GROUND-TRUTH.md` that the model is never shown.
+`books/demo/` carries a synthetic 12-week world — 2 segments, 3 channels, three hiring cohorts —
+with four planted mechanisms and a ground truth in `sim/GROUND-TRUTH.md` that the model is never
+shown.
 
-The source documents are written **deliberately messy**: two title rows above the header, AHT in
-minutes, shrinkage as a percentage of schedule, quoted thousands separators, a RAG column and an
-owner column. A generator that emitted canonical CSVs would prove nothing about the mapping layer.
+The source documents are written **deliberately messy**, because a generator that emitted canonical
+CSVs would prove nothing about the mapping layer:
+
+| Source | Format | What it exercises |
+|---|---|---|
+| `planner-mtd.csv` | CSV | two title rows above the header, AHT in minutes, occupancy and service level as percentages, quoted thousands separators, RAG and owner columns |
+| `roster-summary.csv` | CSV | shrinkage as a *percentage of schedule* where the schema wants hours — the `percent_of` transform |
+| `hiring-pipeline.xlsx` | **XLSX** | a named sheet, a title block, real Date cells, a formula column, and human milestone labels needing `lookup` |
+
+Three mapping files, written once. No code changes to ingest any of them.
 
 ### What the run produces
 
@@ -106,11 +115,11 @@ INGEST     504 demand rows, 84 supply rows, 13 of 13 demand columns filled
            VALIDATION: PASS          2 gaps registered
 MODEL      required 35,608 h [E] · delivered 31,739 h · short on 61 of 84 days
            Jun +349 h   Jul -1,765 h   Aug -2,454 h
-SIMULATE   13 of 16 parameters learned · 22 weeks scored · coverage 0.0% [E]
+SIMULATE   16 of 16 parameters learned · 22 weeks scored · coverage 0.0% [C]
 REPORT     "The plan is short on 61 of 84 days [E]" · decision: approve 50 heads
 ```
 
-### What it recovers — `sim/verify-recovery.py`, 11/11
+### What it recovers — `sim/verify-recovery.py`, 14/14
 
 | Check | Result |
 |---|---|
@@ -123,10 +132,18 @@ REPORT     "The plan is short on 61 of 84 days [E]" · decision: approve 50 head
 | **…and required hours do NOT spike** | **0.98×** — a supply break, not a demand break |
 | Learned `CR[NORTH]` posterior | **0.5475** against a planted 0.55 |
 | Learned `CR[SOUTH]` posterior | **0.3015** against a planted 0.30 |
-| Pipeline parameters stay `prior_only` | 3 of 16 — no `pipeline_events.csv` to learn from |
+| Funnel `req_fill_prob` (prior 0.70) | **0.6257** against a planted 0.624 |
+| Funnel `class_fill_rate` (prior 0.85) | **0.8974** against a planted 0.900 |
+| Funnel `graduation_rate` (prior 0.88) | **0.7970** against a planted 0.794 |
+| Every parameter leaves `prior_only` | **16 of 16** |
+| Grade rule closes the loop | band becomes **[C]**, and the report drops its own prior-only caveat |
 | **Calibration: 80% interval hit rate** | **82%** across 11 scored weeks |
 
-The seventh row is the one that matters. On days 57–58 a training pull removes a third of
+The funnel rows matter for a different reason: each planted truth differs from its prior, so a
+posterior sitting on its prior would prove the `.xlsx` evidence never reached the update. All three
+moved.
+
+The supply-break row is the one that matters most. On days 57–58 a training pull removes a third of
 productive hours while demand is unchanged. Every dashboard reads that as a demand spike. A
 staffing model that agrees is worse than no model, because it recommends hiring to fix a scheduling
 problem.
@@ -221,8 +238,6 @@ Stated here and in every report, rather than discovered by an audience. Full lis
 - **The band is weekly; the plan is daily.** The supply side is a cohort pipeline, and those are
   weekly mechanisms.
 - **Seven simulation parameters have no extractor** and never learn from actuals.
-- **The mapping engine reads CSV only.** `.xlsx` is a single reader function away and is not
-  written.
 - **No intraday.** The WFM export is daily; the receiving system applies its own interval curve.
 
 ---

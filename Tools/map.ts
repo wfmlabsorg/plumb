@@ -14,7 +14,8 @@
 
 import { load } from "js-yaml";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { extname, join } from "node:path";
+import ExcelJS from "exceljs";
 
 // --------------------------------------------------------------- canonical schema
 // Mirrors context/plumb/CANONICAL-SCHEMA.md, which mirrors the CP-WFM-018 pack.
@@ -32,21 +33,41 @@ export const SUPPLY_COLUMNS = [
   "weeks_since_graduation", "separations", "separations_voluntary",
 ] as const;
 
+export const EVENT_COLUMNS = [
+  "date", "event", "cohort_id", "count", "planned_count", "planned_date",
+] as const;
+
+/**
+ * `event` is an enum, and the DENOMINATOR differs by event -- getting
+ * planned_count wrong silently corrupts the fill rates rather than failing:
+ *   offer_accepted -> requisitions opened
+ *   class_started  -> seats planned
+ *   graduated      -> CLASS STARTS, never seats planned
+ */
+export const EVENT_TYPES = [
+  "req_opened", "offer_accepted", "class_started", "graduated", "withdrew",
+] as const;
+
 /** Columns intake.py hard-fails on if absent. */
 export const REQUIRED = {
   demand: ["date", "segment", "channel", "transactions", "contacts_offered",
            "contacts_handled", "productive_hours", "aht_seconds"],
   supply: ["date", "scheduled_hours", "productive_hours",
            "shrink_planned_hours", "shrink_unplanned_hours"],
+  events: ["date", "event", "count"],
 } as const;
 
 // ------------------------------------------------------------------ mapping types
 
-type ColumnSpec = string | { from: string; transform?: string; of?: string };
+type ColumnSpec =
+  | string
+  | { from: string; transform?: string; of?: string; values?: Record<string, string> };
+
+export type MappingKind = "demand" | "supply" | "events";
 
 export type Mapping = {
   source: string;
-  kind: "demand" | "supply";
+  kind: MappingKind;
   file: string;
   header_row: number;
   sheet?: string;
@@ -72,6 +93,22 @@ const TRANSFORMS: Record<string, (v: string, ctx: Record<string, string>, of?: s
     return (num(v) / 100) * num(ctx[of]);
   },
 };
+
+/**
+ * Translate a source label into a canonical one, e.g. "Offer Accepted" ->
+ * "offer_accepted". Real exports use human labels, and the canonical enums are
+ * matched exactly, so without this every such row is silently dropped from the
+ * rates that depend on it. An unlisted value is an error, never a pass-through:
+ * a new milestone appearing in next month's file must be noticed.
+ */
+function lookup(value: string, values?: Record<string, string>): string {
+  if (!values) throw new Error("lookup requires a `values:` map");
+  const hit = values[value] ?? values[value.trim()];
+  if (hit === undefined)
+    throw new Error(
+      `lookup has no entry for "${value}" (known: ${Object.keys(values).join(", ")})`);
+  return hit;
+}
 
 /** Tolerant numeric parse: strips thousands separators, currency and stray spaces. */
 function num(v: string): number {
@@ -107,6 +144,67 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
+// -------------------------------------------------------------------------- XLSX
+
+/**
+ * Read a worksheet into the same string[][] grid a CSV produces, so everything
+ * downstream is format-blind.
+ *
+ * Two things a spreadsheet does that a CSV cannot, both handled here:
+ *  - a DATE cell arrives as a JS Date, not text. Excel stores it as a serial
+ *    number with no timezone, and ExcelJS hands it back at UTC midnight, so the
+ *    ISO date must be taken from the UTC parts. Using toISOString() after a
+ *    local-time conversion shifts every date by a day west of Greenwich.
+ *  - a FORMULA cell arrives as {formula, result}. We want the cached result,
+ *    which is what the person who sent the file was looking at.
+ */
+async function readXlsx(path: string, sheetName?: string): Promise<string[][]> {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(path);
+
+  const ws = sheetName ? wb.getWorksheet(sheetName) : wb.worksheets[0];
+  if (!ws) {
+    const have = wb.worksheets.map((w) => `"${w.name}"`).join(", ");
+    throw new Error(`sheet "${sheetName}" not found; the workbook has ${have}`);
+  }
+
+  const grid: string[][] = [];
+  ws.eachRow({ includeEmpty: true }, (row) => {
+    const out: string[] = [];
+    // row.values is 1-indexed with a leading hole; walk by column count instead.
+    for (let c = 1; c <= ws.columnCount; c++) out.push(cellText(row.getCell(c).value));
+    grid.push(out);
+  });
+  return grid;
+}
+
+function cellText(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (v instanceof Date) {
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${v.getUTCFullYear()}-${p(v.getUTCMonth() + 1)}-${p(v.getUTCDate())}`;
+  }
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    if ("result" in o) return cellText(o.result);        // formula: use the cached result
+    if ("text" in o) return String(o.text);              // hyperlink / rich text
+    if ("richText" in o)
+      return (o.richText as { text: string }[]).map((r) => r.text).join("");
+    if ("error" in o) throw new Error(`spreadsheet cell holds an error: ${String(o.error)}`);
+  }
+  return String(v);
+}
+
+/** Dispatch on extension. Everything downstream sees the same grid. */
+async function readGrid(path: string, sheet?: string): Promise<string[][]> {
+  const ext = extname(path).toLowerCase();
+  if (ext === ".xlsx" || ext === ".xlsm") return readXlsx(path, sheet);
+  if (ext === ".csv" || ext === ".txt" || ext === "") return parseCsv(readFileSync(path, "utf8"));
+  throw new Error(
+    `unsupported source format "${ext}" — PLUMB reads .csv and .xlsx. ` +
+    "Export the document to one of those, or add a reader in Tools/map.ts.");
+}
+
 export const toCsv = (header: readonly string[], rows: Record<string, unknown>[]): string =>
   [header.join(","),
    ...rows.map((r) => header.map((h) => {
@@ -137,13 +235,18 @@ export type MapResult = {
 
 // ---------------------------------------------------------------------------- run
 
-export function applyMapping(bookDir: string, mapping: Mapping): MapResult {
-  const columns = mapping.kind === "demand" ? DEMAND_COLUMNS : SUPPLY_COLUMNS;
+const COLUMNS_FOR: Record<MappingKind, readonly string[]> = {
+  demand: DEMAND_COLUMNS,
+  supply: SUPPLY_COLUMNS,
+  events: EVENT_COLUMNS,
+};
+
+export async function applyMapping(bookDir: string, mapping: Mapping): Promise<MapResult> {
+  const columns = COLUMNS_FOR[mapping.kind];
   const errors: string[] = [];
   const gaps: Gap[] = [];
 
-  const raw = readFileSync(join(bookDir, "01-source", mapping.file), "utf8");
-  const grid = parseCsv(raw);
+  const grid = await readGrid(join(bookDir, "01-source", mapping.file), mapping.sheet);
 
   const headerIdx = mapping.header_row - 1;      // the file states it 1-indexed
   if (headerIdx >= grid.length)
@@ -197,6 +300,8 @@ export function applyMapping(bookDir: string, mapping: Mapping): MapResult {
       try {
         if (typeof spec === "string") {
           out[canonical] = isNumericColumn(canonical) ? num(value) : value;
+        } else if (spec.transform === "lookup") {
+          out[canonical] = lookup(value, spec.values);
         } else if (spec.transform) {
           const fn = TRANSFORMS[spec.transform];
           if (!fn) throw new Error(`unknown transform "${spec.transform}"`);
@@ -208,6 +313,14 @@ export function applyMapping(bookDir: string, mapping: Mapping): MapResult {
         errors.push(`row ${i + mapping.header_row + 1}, ${canonical}: ${(e as Error).message}`);
       }
     }
+    // The event column is an enum. A typo here does not fail -- it silently
+    // drops the row out of every rate that uses it -- so check it at the door.
+    if (mapping.kind === "events" && typeof out.event === "string" &&
+        !(EVENT_TYPES as readonly string[]).includes(out.event)) {
+      errors.push(
+        `row ${i + mapping.header_row + 1}: event "${out.event}" is not one of ` +
+        EVENT_TYPES.join(", "));
+    }
     rows.push(out);
   }
 
@@ -215,7 +328,8 @@ export function applyMapping(bookDir: string, mapping: Mapping): MapResult {
   return { mapping, rows, columns, gaps, errors, filled, total: columns.length };
 }
 
-const TEXT_COLUMNS = new Set(["date", "segment", "channel", "site", "cohort_id"]);
+const TEXT_COLUMNS = new Set(
+  ["date", "segment", "channel", "site", "cohort_id", "event", "planned_date"]);
 const isNumericColumn = (c: string) => !TEXT_COLUMNS.has(c);
 const round4 = (x: number) => Math.round(x * 10000) / 10000;
 
@@ -224,7 +338,8 @@ export function loadMapping(bookDir: string, source: string): Mapping {
   const m = load(readFileSync(path, "utf8")) as Mapping;
   for (const k of ["source", "kind", "file", "header_row", "columns"] as const)
     if (!(k in m)) throw new Error(`${source}.yaml is missing required key "${k}"`);
-  if (m.kind !== "demand" && m.kind !== "supply")
-    throw new Error(`${source}.yaml: kind must be "demand" or "supply", got "${m.kind}"`);
+  if (!["demand", "supply", "events"].includes(m.kind))
+    throw new Error(
+      `${source}.yaml: kind must be "demand", "supply" or "events", got "${m.kind}"`);
   return m;
 }

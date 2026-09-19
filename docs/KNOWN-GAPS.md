@@ -62,11 +62,10 @@ segment at once — weather, an outage, a platform failure — is therefore unde
 
 ## PLUMB's own gaps, not the pack's
 
-- **The mapping engine reads CSV only.** Real planner documents are frequently `.xlsx`. The reader
-  is a single function in `Tools/map.ts` and the mapping schema already carries a `sheet:` key for
-  it, but the xlsx path is not written.
-- **`pipeline_events.csv` has no mapping in the demo book**, so the three hiring-pipeline
-  parameters stay `prior_only`. That is honest rather than broken — but it means the supply side
-  of the band is assumption, not observation.
 - **The deterministic model and the simulation disagree about grain by design** (daily vs weekly).
   Reconciling them is a resampling step, not a rebuild, but it is not written.
+- **Only `.csv` and `.xlsx` are read.** A `.pdf` or `.docx` planner has to be exported first. PLUMB
+  says so rather than guessing.
+- **`percent_of` and `lookup` resolve against the source row only.** Neither can reference a value
+  from another file or a previous row, so a document that expresses shrinkage against a
+  month-to-date total rather than the row's own schedule needs that column precomputed.

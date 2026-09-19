@@ -106,7 +106,7 @@ than one without. Present it alongside the first model output, never as a reason
   writeFileSync(join(bookDir, "02-canonical", "INTAKE-GAPS.md"), md);
 }
 
-function ingest(flags: Record<string, string[]>) {
+async function ingest(flags: Record<string, string[]>) {
   const book = one(flags, "book") ?? die("--book is required");
   const bookDir = join(ROOT, "books", book);
   const sources = flags.source ?? autodetectSources(bookDir);
@@ -119,10 +119,12 @@ function ingest(flags: Record<string, string[]>) {
 
   for (const source of sources) {
     const mapping = loadMapping(bookDir, source);
-    const res = applyMapping(bookDir, mapping);
+    const res = await applyMapping(bookDir, mapping);
     results.push(res);
 
-    const outName = mapping.kind === "demand" ? "daily_demand.csv" : "daily_supply.csv";
+    const outName = { demand: "daily_demand.csv",
+                      supply: "daily_supply.csv",
+                      events: "pipeline_events.csv" }[mapping.kind];
     writeFileSync(join(bookDir, "02-canonical", outName), toCsv(res.columns, res.rows));
 
     console.log(`\n  ${source}  (${mapping.kind})`);
@@ -625,7 +627,7 @@ PLUMB — deterministic + probabilistic staffing engine
 
 const { cmd, flags } = parseArgs(process.argv.slice(2));
 switch (cmd) {
-  case "ingest":   ingest(flags); break;
+  case "ingest":   await ingest(flags); break;
   case "model":    model(flags); break;
   case "simulate": simulate(flags); break;
   case "report":   report(flags); break;

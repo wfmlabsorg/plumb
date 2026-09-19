@@ -6,6 +6,22 @@ source, reviewed by a human, reused forever.
 **The mapping file is the memory of how that source is shaped.** It is the artifact that makes
 "drop any planner document in" work without guessing.
 
+## Formats
+
+`.csv` and `.xlsx` (or `.xlsm`). The reader dispatches on the extension and everything downstream
+sees the same grid, so a mapping differs between the two only by `sheet:`.
+
+A spreadsheet does two things a CSV cannot, both handled for you:
+
+- **Date cells** arrive as real dates, not text. Excel stores them without a timezone, so the ISO
+  date is read from the UTC parts — taking it from local time shifts every date by a day west of
+  Greenwich.
+- **Formula cells** arrive with their cached result, which is what the person who sent you the file
+  was looking at.
+
+Anything else — `.pdf`, `.docx`, a Google Sheet — has to be exported first. PLUMB will say so
+rather than guess.
+
 ## Location
 
 `books/<client>/mappings/<source>.yaml`
@@ -47,10 +63,31 @@ unmapped_ok:                        # source columns deliberately ignored
 | `percent_to_fraction` | ÷ 100 when the value exceeds 1 |
 | `strip_commas` | "1,240" → 1240 |
 | `blank_as_zero` | empty → 0 — **use sparingly**, see below |
+| `percent_of` | a percentage against another column: `{from: "Shrink %", transform: percent_of, of: "Sched Hrs"}` |
+| `lookup` | a source label → a canonical value, via a `values:` map |
 
 `blank_as_zero` asserts that a blank genuinely means zero rather than missing. On volume it is
 usually right; on shrinkage or AHT it is almost always wrong and will silently understate the
 requirement.
+
+### `lookup`
+
+Canonical enums are matched **exactly**, and real exports use human labels. Without a lookup,
+`"Offer Accepted"` silently drops out of every rate that depends on it — the ingest passes, the
+row is counted nowhere, and the fill rate is quietly wrong.
+
+```yaml
+event:
+  from: "Milestone"
+  transform: lookup
+  values:
+    "Req Opened":     req_opened
+    "Offer Accepted": offer_accepted
+    "Graduated":      graduated
+```
+
+**An unlisted value is an error, never a pass-through.** A new milestone appearing in next month's
+extract has to be noticed, not absorbed.
 
 ## The Rules
 

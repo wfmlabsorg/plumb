@@ -98,13 +98,30 @@ if state_file.exists():
          abs(beta_mean("CR[NORTH]") - 0.55) < 0.03, f"{beta_mean('CR[NORTH]'):.4f}")
     band("learning control: CR[SOUTH] posterior stays at 0.30",
          abs(beta_mean("CR[SOUTH]") - 0.30) < 0.02, f"{beta_mean('CR[SOUTH]'):.4f}")
-    band("learning: pipeline parameters honestly remain prior_only",
-         all(post[k].get("prior_only") for k in
-             ("req_fill_prob", "class_fill_rate", "graduation_rate")),
-         "no pipeline_events.csv, so nothing to learn from")
-    n_expected = 10
-    band(f"learning: at least {n_expected} of 16 parameters left prior_only state",
-         len(learned) >= n_expected, f"{len(learned)} of {len(post)} learned")
+    # --- effect 4: the hiring funnel, delivered as .xlsx --------------------
+    # Priors are 0.70 / 0.85 / 0.88; the planted truth differs from each, so a
+    # posterior sitting on its prior means the xlsx evidence never arrived.
+    for name, truth in (("req_fill_prob", 0.624),
+                        ("class_fill_rate", 0.900),
+                        ("graduation_rate", 0.794)):
+        if name in post and not post[name].get("prior_only"):
+            band(f"effect 4: {name} learned toward {truth:.3f}",
+                 abs(beta_mean(name) - truth) < 0.03, f"{beta_mean(name):.4f}")
+        else:
+            band(f"effect 4: {name} learned toward {truth:.3f}",
+                 False, "still prior_only — pipeline evidence did not reach the update")
+
+    band("learning: every parameter has left prior_only state",
+         len(learned) == len(post), f"{len(learned)} of {len(post)} learned")
+
+    # With nothing prior_only the band is computed, not estimated. This is the
+    # grade rule closing the loop: the report's confidence is derived from the
+    # model's actual state rather than asserted.
+    sim_file = R / "books/demo/03-model/simulation.json"
+    if sim_file.exists():
+        grade = json.loads(sim_file.read_text())["band_grade"]
+        band("grade rule: band is [C] once no parameter is prior_only",
+             grade == ("C" if len(learned) == len(post) else "E"), f"band_grade [{grade}]")
 else:
     print("  SKIP  learning checks — run `Tools/run.ts simulate --learn` first")
 

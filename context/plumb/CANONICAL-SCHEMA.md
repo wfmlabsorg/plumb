@@ -52,6 +52,11 @@ productive_hours, shrink_planned_hours, shrink_unplanned_hours`.
 | `class_started` | seats planned |
 | `graduated` | **class starts** — never seats planned |
 
+A mapping for this file uses `kind: events`, and the `event` column almost always needs a
+`lookup` transform — see `MAPPING-CONVENTION.md`. Without `planned_count` the three funnel rates
+(`req_fill_prob`, `class_fill_rate`, `graduation_rate`) can never leave `prior_only`, so the
+supply side of the band stays assumption rather than observation.
+
 ## Sparse Is Legal
 
 A planner document carrying only forecast volume and AHT produces rows with the rest empty. That

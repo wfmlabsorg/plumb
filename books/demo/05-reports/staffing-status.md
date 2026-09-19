@@ -2,7 +2,7 @@
 
 _Issued 2026-09-19 · covering 2026-06-01 to 2026-08-23_
 
-**The plan is short on 61 of 84 days [E]; coverage across the horizon is 0% [E].**
+**The plan is short on 61 of 84 days [E]; coverage across the horizon is 0% [C].**
 
 ## What changed
 
@@ -28,18 +28,18 @@ Worst day **2026-07-27**: 67 FTE short (282 h) [C]. Worst week **2026-07-27/2026
 
 ### The range
 
-Coverage across the horizon is **0.0%** [E] — the plan holds in fewer than 1 run in 100. The interactive lane alone covers **1.3%**.
+Coverage across the horizon is **0.0%** [C] — the plan holds in fewer than 1 run in 100. The interactive lane alone covers **1.5%**.
 
-**Both lanes are short** — 1% interactive against 0% pooled. This is not a backlog problem that overtime absorbs. The queue itself is uncovered, and only capacity closes it.
+**Both lanes are short** — 2% interactive against 0% pooled. This is not a backlog problem that overtime absorbs. The queue itself is uncovered, and only capacity closes it.
 
 The decision curve — what more heads buys:
 
 | Extra heads | Coverage |
 |---|---|
 | +0 | 0.0% |
-| +20 | 8.6% |
-| +40 | 61.5% |
-| +60 | 94.9% |
+| +20 | 9.4% |
+| +40 | 62.8% |
+| +60 | 95.2% |
 | +80 | 99.7% |
 
 ### Calibration
@@ -53,12 +53,11 @@ The decision curve — what more heads buys:
 ## What would change the answer
 
 - **Measuring occupancy.** It is the largest single assumption in the requirement and it currently rests on the Erlang curve rather than this operation's own achieved occupancy.
-- **The three largest variance contributors** are `AHT[voice]` (67%), `txn[NORTH]` (29%), `txn[SOUTH]` (26%). These are a rank-correlation screen, not effect estimates; confirm with `pin_check()` before commissioning any measurement work.
+- **The three largest variance contributors** are `AHT[voice]` (66%), `txn[NORTH]` (29%), `txn[SOUTH]` (27%). These are a rank-correlation screen, not effect estimates; confirm with `pin_check()` before commissioning any measurement work.
 - **A pipeline feed.** Without `pipeline_events.csv` the hiring pipeline is entirely prior, so the supply side of the band is assumption, not observation.
 
 ## Limitations
 
-- **3 of the model's parameters have never seen an observation** (class_fill_rate, graduation_rate, req_fill_prob). The band is graded **[E]** for that reason: it reflects what was assumed as much as what was measured.
 - **Occupancy as a service-level proxy is this model's weakest joint.** Achievable occupancy rises with pooled load — about 83% at 30 erlangs and 97% at 480 — so a fixed value exaggerates both tails. This run uses the Erlang curve.
 - **The band is weekly; the plan is daily.** The supply side is a cohort pipeline (requisition, time to fill, class, training, graduation, ramp) and those are weekly mechanisms. A daily band would be false precision.
 - **Seven simulation parameters have no extractor** and never learn from actuals. See `docs/KNOWN-GAPS.md`. They are not calibrated and are not described as such.
