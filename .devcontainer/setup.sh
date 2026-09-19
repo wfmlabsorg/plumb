@@ -53,6 +53,11 @@ else
   echo "[4/10] Claude Code already installed"
 fi
 
+# 4b. Install PLUMB's own runtime dependencies (js-yaml, exceljs)
+# Without this the mapping engine cannot start: `ingest` dies on its first import.
+(cd "$REPO_DIR" && bun install --frozen-lockfile 2>/dev/null || bun install)
+echo "[4b/10] PLUMB dependencies installed"
+
 # 5. Create ~/.claude/ directory structure
 mkdir -p "$HOME/.claude"
 echo "[5/10] Created ~/.claude/"
@@ -123,16 +128,39 @@ SETTINGS_EOF
 echo "[8/10] Generated settings.json with hook registrations"
 
 # 9. Python environment for the engine
+set +e
 # PLUMB is TypeScript on bun everywhere EXCEPT Tools/engine/, which holds the
 # staffing math (deterministic model + Monte Carlo). That code is reused as-is
 # from the verified CP-WFM-018 pack; see docs/ENGINE.md for why it stays Python.
-if ! command -v python3 &> /dev/null; then
-  sudo apt-get update -qq && sudo apt-get install -y -qq python3 python3-venv python3-pip
+# The base image ships python3 but NOT python3-venv, so testing for python3
+# alone is the wrong check -- venv creation then half-succeeds, leaving an
+# interpreter with no pip and no site-packages that shadows a working system
+# python. Test the capability, not the binary.
+VENV="$HOME/plumb/Tools/engine/.venv"
+rm -rf "$VENV"
+
+if ! python3 -m venv "$VENV" 2>/dev/null; then
+  echo "       python3-venv missing, installing..."
+  sudo apt-get update -qq
+  sudo apt-get install -y -qq python3-venv python3-pip
+  rm -rf "$VENV"
+  python3 -m venv "$VENV"
 fi
-python3 -m venv "$HOME/plumb/Tools/engine/.venv"
-"$HOME/plumb/Tools/engine/.venv/bin/pip" install -q --upgrade pip
-"$HOME/plumb/Tools/engine/.venv/bin/pip" install -q -r "$HOME/plumb/Tools/engine/requirements.txt"
-echo "[9/10] Python engine environment ready"
+
+if [ -x "$VENV/bin/pip" ]; then
+  "$VENV/bin/pip" install -q --upgrade pip
+  "$VENV/bin/pip" install -q -r "$HOME/plumb/Tools/engine/requirements.txt"
+  "$VENV/bin/python" -c "import numpy, pandas, scipy, yaml" \
+    && echo "[9/10] Python engine environment ready" \
+    || echo "[9/10] WARNING: engine dependencies failed to import"
+else
+  rm -rf "$VENV"
+  echo "[9/10] WARNING: could not build the engine venv."
+  echo "       PLUMB will fall back to system python3 if it has numpy, pandas,"
+  echo "       scipy and PyYAML. See docs/ENGINE.md."
+fi
+
+set -e
 
 # 10. Generate skill index
 bun run "$HOME/.claude/Tools/GenerateSkillIndex.ts" 2>/dev/null \

@@ -1,6 +1,5 @@
 {
   "name": "plumb",
-  "module": "index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
@@ -13,5 +12,14 @@
     "@types/js-yaml": "^4.0.9",
     "exceljs": "^4.4.0",
     "js-yaml": "^5.4.2"
+  },
+  "scripts": {
+    "demo": "bun run seed && bun run ingest && bun run model && bun run simulate && bun run report && bun run verify",
+    "seed": "bun run sim/generate.ts && bun run sim/generate-pipeline.ts",
+    "ingest": "bun run Tools/run.ts ingest --book demo",
+    "model": "bun run Tools/run.ts model --book demo",
+    "simulate": "bun run Tools/run.ts simulate --book demo --learn",
+    "report": "bun run Tools/run.ts report --book demo",
+    "verify": "python3 sim/verify-recovery.py"
   }
 }

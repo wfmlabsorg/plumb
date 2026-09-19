@@ -77,16 +77,21 @@ INGEST → MODEL → REPORT.
 
 ```bash
 bun install
-
-bun run sim/generate.ts                            # build the synthetic world (10 checks)
-bun run sim/generate-pipeline.ts                   # the hiring pipeline, as .xlsx
-bun run Tools/run.ts ingest   --book demo          # planner docs -> canonical, validated
-bun run Tools/run.ts model    --book demo          # the deterministic daily plan
-bun run Tools/run.ts simulate --book demo --learn  # learn from actuals, then draw the band
-bun run Tools/run.ts report   --book demo          # exec report + WFM export
-
-python3 sim/verify-recovery.py                     # did the model recover the planted truth?
+bun run demo          # the whole thing, ~30s, ending in 14/14 recovery checks
 ```
+
+Or a step at a time, which is the better shape for walking someone through it:
+
+```bash
+bun run seed          # build the synthetic world + the hiring pipeline .xlsx
+bun run ingest        # planner docs -> canonical, validated, gaps registered
+bun run model         # the deterministic daily plan
+bun run simulate      # learn from actuals, then draw the band
+bun run report        # exec report + WFM export
+bun run verify        # did the model recover the planted truth?
+```
+
+The underlying CLI takes any book: `bun run Tools/run.ts ingest --book <book>`.
 
 `--learn` replays the book week by week: absorb the week's evidence, score the forecast issued for
 it, update the posteriors, issue the next forecast. Without it the simulation runs on priors.
