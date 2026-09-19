@@ -1,0 +1,60 @@
+# Blue Shield Interval Analysis Configuration
+# Example config for 30-minute interval SL performance analysis
+
+project:
+  name: "Blue Shield Interval Analysis"
+  client: "Blue Shield of California"
+
+source:
+  directory: ~/plumb/books/sample-engagement/01-source/Dec 29 Full Download/Plan & Performance Data/2025 IDP Documents - 30m Interval
+  file_pattern: "*.xlsx"
+
+etl:
+  template: pivot_to_long
+  parameters:
+    days: [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
+    metrics_per_day: 6
+    interval_column: 1
+
+analysis:
+  type: deviation_analysis
+  metric: Actual_SL
+  dimensions: [LOB, Date, Interval]
+  goals:
+    default: 0.80
+    overrides:
+      Concierge: 0.90
+      Designated: 0.90
+  thresholds:
+    significantly_above: 10
+    slightly_above: 5
+    within_range: 0
+    slightly_below: -5
+    significantly_below: -10
+  special_rules:
+    - condition: "goal == 0.90 AND actual > 0.995"
+      override_category: "Significantly Above"
+
+qa:
+  completeness:
+    required_dimensions: [LOB]
+    date_continuity: false
+    no_null_metrics: [Actual_SL, Actual_Calls]
+  ranges:
+    Actual_SL: [0, 1]
+    Actual_Calls: [0, null]
+    Actual_AHT: [0, 7200]
+
+report:
+  template: performance_analysis
+  title: "Service Level Performance Analysis Report"
+  include_sections:
+    - executive_summary
+    - methodology
+    - results
+    - recommendations
+    - appendix
+
+output:
+  directory: ~/plumb/books/sample-engagement/03-output/interval-analysis
+  formats: [md]

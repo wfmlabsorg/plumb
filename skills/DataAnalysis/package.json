@@ -1,0 +1,21 @@
+{
+  "name": "data-analysis-skill",
+  "version": "1.0.0",
+  "description": "End-to-end data analysis pipeline for consulting engagements",
+  "type": "module",
+  "main": "src/orchestrator.ts",
+  "scripts": {
+    "analyze": "bun run src/orchestrator.ts",
+    "ingest": "bun run src/orchestrator.ts ingest",
+    "etl": "bun run src/orchestrator.ts etl",
+    "run": "bun run src/orchestrator.ts run",
+    "qa": "bun run src/orchestrator.ts qa",
+    "report": "bun run src/orchestrator.ts report"
+  },
+  "dependencies": {
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
