@@ -26,6 +26,15 @@ intuitive order.
 | **Cost to obtain** | Realistic effort, named owner if known |
 | **Rank** | Integer, 1 = do this first |
 
+## When it is written
+
+`run.ts ingest` writes the register with the mapping gaps — what the document did not carry.
+`run.ts simulate` **rewrites it**, adding the variance share for every input and re-ranking, plus
+the parameters the engine samples and can never learn.
+
+So the register before a simulation is a complete list with no priority; after one it is ranked.
+Read it in that order and say which you are looking at.
+
 ## Method
 
 1. **List every gap.** Unmapped canonical columns, unmapped source columns, `prior_only`
