@@ -642,8 +642,14 @@ if sim:
     L.append(f"- **The three largest variance contributors** are {names}. These are a "
              f"rank-correlation screen, not effect estimates; confirm with \`pin_check()\` "
              f"before commissioning any measurement work.")
-L.append(f"- **A pipeline feed.** Without \`pipeline_events.csv\` the hiring pipeline is entirely "
-         f"prior, so the supply side of the band is assumption, not observation.")
+FUNNEL = ("req_fill_prob", "class_fill_rate", "graduation_rate")
+funnel_prior = [p for p in FUNNEL if p in prior_only]
+if not sim or funnel_prior:
+    _which = (", ".join(f"\`{p}\`" for p in funnel_prior)
+              if funnel_prior else "the hiring funnel")
+    _verb = "remain" if len(funnel_prior) != 1 else "remains"
+    L.append(f"- **A pipeline feed.** Without observed \`pipeline_events.csv\`, {_which} "
+             f"{_verb} prior, so the supply side of the band is assumption, not observation.")
 L.append("")
 L.append("## Limitations")
 L.append("")
