@@ -12,7 +12,7 @@ a demand spike. A staffing model that does the same is worse than no model, beca
 will recommend hiring to fix a scheduling problem.
 """
 import pandas as pd, pathlib
-R = pathlib.Path.home() / "projects/plumb"
+R = pathlib.Path(__file__).resolve().parent.parent
 plan = pd.read_csv(R / "books/demo/03-model/deterministic.csv", parse_dates=["date"])
 plan["day"] = (plan.date - pd.Timestamp("2026-06-01")).dt.days + 1
 
