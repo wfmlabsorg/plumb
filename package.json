@@ -20,6 +20,17 @@
     "model": "bun run Tools/run.ts model --book demo",
     "simulate": "bun run Tools/run.ts simulate --book demo --learn",
     "report": "bun run Tools/run.ts report --book demo",
-    "verify": "python3 sim/verify-recovery.py"
+    "verify": "python3 sim/verify-recovery.py",
+    "cycle:world": "bun run cycle/run.ts world",
+    "cycle:pdp": "bun run cycle/run.ts pdp",
+    "cycle:test": "bun test cycle/test",
+    "cycle:reforecast": "bun run cycle/run.ts reforecast",
+    "cycle:weekly": "bun run cycle/run.ts weekly",
+    "cycle:monthly": "bun run cycle/run.ts monthly",
+    "cycle:intake": "bun run cycle/run.ts intake",
+    "cycle:review": "bun run cycle/run.ts review",
+    "cycle:publish": "bun run cycle/run.ts publish",
+    "cycle:learn": "bun run cycle/run.ts learn",
+    "cycle:demo": "bun run cycle/demo.ts"
   }
 }
