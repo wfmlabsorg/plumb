@@ -7,19 +7,21 @@ import type { Dataset } from "./contracts";
 import { pdpFor, pdpMarkdown } from "./pdp";
 import { propose, replay, type ProposedRow } from "./reforecast";
 import { reforecastMarkdown } from "./reforecast-report";
-import { monthlyLock, monthlyMarkdown, weeklyMarkdown, weeklyRefresh } from "./cadence";
+import { monthlyLock, monthlyMarkdown, weeklyMarkdown, weeklyRefresh, type MonthlyLock, type WeeklyRefresh } from "./cadence";
 import { extract as extractSignals, gate as gateSignals, type Signal } from "./signals";
 import { intakeMarkdown } from "./intake-report";
 import type { Item } from "./materials";
 import { backtest, earning, effectLibrary, forwardCheck, learningPolicy, type Forward } from "./learn";
 import { learnMarkdown } from "./learn-report";
 import { buildPacket, publish, wfmExport, type Decisions, type Packet, type RecordRow } from "./review";
-import { addDays, type ExtractRow } from "./world";
+import { addDays, type ExtractRow, type OutlookRow } from "./world";
 
 export interface PipelineInput { data: Dataset; items?: Item[]; signalDecisions?: Record<string, "accept" | "reject">; weeks?: number; reviewDecisions?: Decisions; priorRecord?: { asOf: string; rows: RecordRow[]; signals?: Signal[]; edits?: Decisions["decisions"] }; progress?: (s: string) => void }
 export interface PipelineOutput {
   asOf: string; through: string; reports: { id: string; title: string; md: string }[]; packet: Packet; rows: ProposedRow[];
   published: { ok: boolean; problems: string[]; version?: string; record?: RecordRow[]; wfm?: ReturnType<typeof wfmExport> } | null; forward: Forward | null; summary: Record<string, string | number>;
+  /** structured outputs for downstream views (shape files), alongside the Markdown reports */
+  monthly: MonthlyLock; weekly: WeeklyRefresh; outlook: OutlookRow[]; signals: Signal[];
 }
 
 export function runPipeline(inp: PipelineInput): PipelineOutput {
@@ -49,7 +51,7 @@ export function runPipeline(inp: PipelineInput): PipelineOutput {
   let published: PipelineOutput["published"] = null;
   if (inp.reviewDecisions) { say("publish"); const res = publish(packet, inp.reviewDecisions, rows); published = { ok: res.ok, problems: res.problems, version: res.version, record: res.rows, wfm: res.rows ? wfmExport(res.rows) : undefined }; }
   const moved = packet.gates.filter((x) => Math.abs(x.change_pct) >= 1).length;
-  return { asOf: st.asOf, through, reports, packet, rows, published, forward: fwd,
+  return { asOf: st.asOf, through, reports, packet, rows, published, forward: fwd, monthly: ml, weekly: wr2, outlook: data.outlook, signals: g.signals,
     summary: { gates: GATES.length, history: `${data.extract[0]!.date} → ${through}`, below_target_yesterday: p.lines.filter((l) => l.sl_gap_pts < -5).length, flags_in_history: st.detected.length, signals: g.signals.length, overlays: g.overlays.length, gates_learning: policy.size, gates_moved: moved, earned_auto_approval: earned.filter((e) => e.eligible).length, hiring_asks: ml.hires.length } };
 }
 
