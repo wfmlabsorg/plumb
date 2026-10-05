@@ -1,6 +1,6 @@
 # PLUMB — Deterministic + Probabilistic Staffing Engine
 
-**PAI v2.0 architecture · TypeScript on bun, with one Python island for the math**
+**A Claude Code project · TypeScript on bun, with one Python island for the math · maintained by WFM Labs**
 
 PLUMB takes a planner document — a month-to-date sheet, a daily planner, whatever shape it arrives
 in — and returns a deterministic staffing model, a Monte Carlo range around it, and reports an
@@ -9,22 +9,22 @@ executive or a workforce management system can act on.
 A plumb line gives you one number and an honest sense of how far off vertical you might be. That
 is the whole product.
 
-## Lineage
+## Design choices
 
-PLUMB is HORIZON forked back toward CASE.
+PLUMB is the small version of an idea first built large.
 
-**HORIZON** proved the planner-ecosystem idea and was too heavy to operate: 11 agents, 10 versioned
+**An earlier, heavier prototype** proved the planner-ecosystem idea and was too heavy to operate: 11 agents, 10 versioned
 ledgers per book, 4 clocks, ~3,600 lines of clock machinery, and a committed demo of 119 daily
 notes. It passed its own adversarial review at 4.1/5 — the work was sound. The surface area was a
 demo artifact, not something you drop a file into on a Monday.
 
-**CASE** is the opposite: 5 agents, 6 phase gates, a documented engagement folder, nothing else.
+**A lightweight engagement workflow** is the opposite: 5 agents, 6 phase gates, a documented folder, nothing else.
 It is operational because it is small.
 
-PLUMB keeps HORIZON's one genuinely load-bearing convention — **every number carries a grade** —
+PLUMB keeps the prototype's one genuinely load-bearing convention — **every number carries a grade** —
 and drops the ledgers, the clocks, the question register and the gate machinery. The biggest
 single change is that **analysis is pulled by a question rather than pushed by a schedule**.
-HORIZON's Scout proposed 39 event candidates over 119 days; no planner reads that, which is the
+The prototype's scout proposed 39 event candidates over 119 days; no planner reads that, which is the
 same as producing none.
 
 ## Architecture
@@ -58,7 +58,7 @@ same as producing none.
     └──────────────────────────────────────────────────────────────┘
 ```
 
-## Agent team (7, against HORIZON's 11)
+## Agent team (7, against the prototype's 11)
 
 | Agent | Specialty | Rung | Phase |
 |---|---|---|---|
@@ -178,7 +178,7 @@ is a coin flip dressed as a plan.
 ```
 plumb/
 ├── CLAUDE.md          identity, principles, phase table, agent routing
-├── ALGORITHM.md       the universal problem-solving framework
+├── charter/           mission, beliefs, goals, models, strategies, learnings (SUMMARY.md loads at session start)
 ├── agents/            7 agent definitions
 ├── context/plumb/     6 standards: grades, schema, mapping, gaps, answer-first, checkpoints
 ├── skills/            10 analytical skills
@@ -208,7 +208,7 @@ books/<client>/
 ```
 
 Flat files. A re-pull overwrites. Provenance lives in the grade on the number, not in a version
-tree — that was HORIZON's answer and it cost ten ledgers to maintain.
+tree — that was the earlier prototype's answer and it cost ten ledgers to maintain.
 
 ## Ingesting a real planner document
 
@@ -247,4 +247,4 @@ Stated here and in every report, rather than discovered by an audience. Full lis
 
 ---
 
-*Architecture: PAI v2.0 (Miessler — scaffolding > model)*
+*Maintained by WFM Labs. Synthetic data only: no client data lives in this repository.*

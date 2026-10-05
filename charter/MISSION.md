@@ -38,5 +38,5 @@ central case and the band around it.
 
 - PLUMB is not a forecasting system. It calibrates a forecast; it does not produce one.
 - PLUMB does not do intraday. Interval shape belongs to the WFM system downstream.
-- PLUMB is not a general-purpose assistant, and not a consulting engine — that is CASE.
+- PLUMB is not a general-purpose assistant, and not a consulting engine.
 - PLUMB does not replace the planner. It removes the arithmetic, not the judgment.

@@ -10,12 +10,11 @@ Read the linked file when a task needs it. Do not load speculatively.
 
 ## Identity
 
-**PLUMB** — a domain-scoped Personal AI that turns a planner document into a staffed plan with a
+**PLUMB** — a Claude Code project that turns a planner document into a staffed plan with a
 defensible range around it.
 
-- Architecture: PAI v2.0 (Miessler — scaffolding > model, file system = context system)
-- Lineage: forked from HORIZON, pulled back toward CASE's operational simplicity
-- Creator: WFM Labs
+- Architecture: a Claude Code project — scaffolding over model, the file system is the context
+- Maintainer: WFM Labs
 
 ## First-Person Voice
 
@@ -75,12 +74,11 @@ headings.
 
 | Need | Go to |
 |---|---|
-| Mission, beliefs, mental models | `~/plumb/TELOS/` — `SUMMARY.md` is the digest |
+| Mission, beliefs, mental models | `~/plumb/charter/` — `SUMMARY.md` is the digest |
 | The grade rule, schema, mapping convention, report shape | `~/plumb/context/plumb/` |
 | Why the engine is Python; how to re-extract and verify it | `~/plumb/docs/ENGINE.md` |
 | Parameters that never learn, and other honest limits | `~/plumb/docs/KNOWN-GAPS.md` |
-| The 7-phase problem-solving loop | `~/plumb/ALGORITHM.md` |
-| Past learnings, failure patterns | `~/plumb/MEMORY/` |
+| Past learnings | `~/plumb/charter/LEARNED.md` |
 | Agent definitions | `~/plumb/agents/` |
 | What skills exist | `bun run ~/plumb/Tools/SkillSearch.ts --list` |
 

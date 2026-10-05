@@ -1,15 +1,15 @@
 # PLUMB Learned
 
-Accumulated learnings. Seeded from the HORIZON fork and the CP-WFM-018 pack; extended by MEMORY.
+Accumulated learnings. Seeded from an earlier prototype and a published Monte Carlo staffing pack; extended as the engine is used.
 
-## From the HORIZON fork (2026-09-19)
+## From the earlier prototype (2026-09-19)
 
-**Ledger machinery is not free.** HORIZON's ten versioned ledgers, four clocks and question
+**Ledger machinery is not free.** the earlier prototype's ten versioned ledgers, four clocks and question
 register produced a verified, well-graded system that was too heavy to operate. The grade rule
 carried almost all of the epistemic value; the version tree carried almost none of it. PLUMB kept
 the grades and dropped the ledgers.
 
-**Every analytical stage running every day produces more findings than anyone reads.** HORIZON's
+**Every analytical stage running every day produces more findings than anyone reads.** the earlier prototype's
 Scout proposed 39 event candidates over 119 days. A planner will not review that. Analysis has to
 be pulled by a question, not pushed by a schedule.
 

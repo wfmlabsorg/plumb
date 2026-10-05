@@ -79,8 +79,8 @@ cat > "$HOME/.claude/settings.json" << 'SETTINGS_EOF'
 {
   "env": {
     "DA": "PLUMB",
-    "PAI_DIR": "/home/vscode/.claude",
-    "PAI_SOURCE_APP": "PLUMB",
+    "PLUMB_CONFIG_DIR": "/home/vscode/.claude",
+    "PLUMB_SOURCE_APP": "PLUMB",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CODESPACE": "true"
   },

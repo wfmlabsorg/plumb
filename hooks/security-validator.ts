@@ -114,7 +114,7 @@ const ATTACK_PATTERNS = {
   },
 
   // Tier 9: PLUMB infrastructure protection - Block
-  caseProtection: {
+  repoProtection: {
     patterns: [
       /rm.*\.claude/i,
       /git\s+push.*public/i,

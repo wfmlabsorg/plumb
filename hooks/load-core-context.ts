@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // PLUMB hooks/load-core-context.ts
-// SessionStart hook: Inject PLUMB identity and consulting context
+// SessionStart hook: inject PLUMB's identity and charter
 
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
@@ -47,14 +47,14 @@ async function main() {
     }
 
     const payload: SessionStartPayload = JSON.parse(stdinData);
-    const paiDir = process.env.PAI_DIR || join(homedir(), '.claude');
+    const configDir = process.env.PLUMB_CONFIG_DIR || join(homedir(), '.claude');
 
-    // Load CORE skill (PLUMB identity and consulting context)
-    const coreSkillPath = join(paiDir, 'skills', 'CORE', 'SKILL.md');
+    // Load the CORE skill (PLUMB's identity)
+    const coreSkillPath = join(configDir, 'skills', 'CORE', 'SKILL.md');
 
-    // Load TELOS summary (consulting mission context)
-    const caseDir = join(homedir(), 'case');
-    const telosSummaryPath = join(caseDir, 'TELOS', 'SUMMARY.md');
+    // Load the charter summary
+    const rootDir = join(import.meta.dir, '..'); // this repository
+    const charterSummaryPath = join(rootDir, 'charter', 'SUMMARY.md');
 
     if (!existsSync(coreSkillPath)) {
       console.error('[PLUMB] No CORE skill found - skipping context injection');
@@ -63,9 +63,9 @@ async function main() {
 
     const skillContent = readFileSync(coreSkillPath, 'utf-8');
 
-    let telosContent = '';
-    if (existsSync(telosSummaryPath)) {
-      telosContent = readFileSync(telosSummaryPath, 'utf-8');
+    let charterContent = '';
+    if (existsSync(charterSummaryPath)) {
+      charterContent = readFileSync(charterSummaryPath, 'utf-8');
     }
 
     let output = `<system-reminder>
@@ -78,13 +78,13 @@ The following context has been loaded from ${coreSkillPath}:
 ${skillContent}
 `;
 
-    if (telosContent) {
+    if (charterContent) {
       output += `
 ---
 
-## TELOS (Consulting Mission Context)
+## Charter
 
-${telosContent}
+${charterContent}
 `;
     }
 

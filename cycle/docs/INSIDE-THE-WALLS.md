@@ -7,7 +7,7 @@
 **Method crosses; data stays.**
 - **What crosses in.** The runner, the review screen and these instructions are built outside on synthetic, code-named data, then carried in as files.
 - **What stays.** Real exports, reports, review decisions and published records stay on the work laptop or company storage.
-- **What may come back to TARS.** Only code-named shape files (for example an intake packet made with the intake-packet instructions), never raw exports.
+- **What may come back out.** Only code-named shape files (for example an intake packet made with the intake-packet instructions), never raw exports.
 
 ## What you need from the WFM platform
 

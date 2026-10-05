@@ -3,7 +3,7 @@
 PLUMB proposes. A person decides. This standard says where the person sits and what they are
 shown.
 
-HORIZON had a gate before every write and it made the system slow to operate without making it
+the earlier prototype had a gate before every write and it made the system slow to operate without making it
 more correct. PLUMB has **two** checkpoints and no gate machinery — a checkpoint is a prompt and
 a clear presentation, not a state machine.
 

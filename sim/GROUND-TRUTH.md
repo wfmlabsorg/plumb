@@ -81,6 +81,6 @@ demand spike here has failed the most important check in this file.
 ## What is deliberately NOT planted
 
 No outage, no weather event, no migration, no second cohort, no learning curve, no definition
-change. HORIZON had all of those and the resulting world took 917 lines to generate and a day to
+change. the earlier prototype had all of those and the resulting world took 917 lines to generate and a day to
 understand. Three effects are enough to prove the pipeline recovers what it should, and few enough
 that a person can hold them in their head while reading the output.

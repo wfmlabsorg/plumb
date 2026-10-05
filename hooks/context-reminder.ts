@@ -39,7 +39,7 @@ Before responding, remember:
   path is INGEST -> MODEL -> REPORT.
 - Never invent a mapping at run time; never hand-edit MODEL-STATE.md
 - Enforce Pearl's Ladder: correlation is not causation — specify the rung
-- Apply The Algorithm to non-trivial work (OBSERVE -> VERIFY -> LEARN)
+- Work in a loop on non-trivial work (observe -> verify -> learn)
 - Bun over npm, TypeScript over Python — except Tools/engine/, which holds
   all the staffing math on purpose (docs/ENGINE.md)
 

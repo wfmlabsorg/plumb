@@ -5,16 +5,16 @@
  * Search the skill index to discover capabilities dynamically.
  *
  * Usage:
- *   bun run $PAI_DIR/Tools/SkillSearch.ts <query>
- *   bun run $PAI_DIR/Tools/SkillSearch.ts --list
+ *   bun run $PLUMB_CONFIG_DIR/Tools/SkillSearch.ts <query>
+ *   bun run $PLUMB_CONFIG_DIR/Tools/SkillSearch.ts --list
  */
 
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
-const PAI_DIR = process.env.PAI_DIR || process.env.PAI_HOME || join(process.env.HOME || '', '.claude');
-const INDEX_FILE = join(PAI_DIR, 'skills', 'skill-index.json');
+const CONFIG_DIR = process.env.PLUMB_CONFIG_DIR || join(process.env.HOME || '', '.claude');
+const INDEX_FILE = join(CONFIG_DIR, 'skills', 'skill-index.json');
 
 interface SkillEntry {
   name: string;

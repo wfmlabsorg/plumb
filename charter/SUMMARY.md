@@ -1,11 +1,10 @@
 # PLUMB — Deterministic + Probabilistic Staffing Engine
-## TELOS Summary (Auto-loaded at Session Start)
+## Charter summary (loaded at session start)
 
 **Mission:** Turn a planner document into a staffed plan with a defensible range around it — and
 never let a point estimate leave the building on its own.
 
-**Creator:** WFM Labs
-**Lineage:** forked from HORIZON, pulled back toward CASE's operational simplicity
+**Maintainer:** WFM Labs
 
 ---
 
@@ -26,7 +25,7 @@ never let a point estimate leave the building on its own.
 
 ## Methodology
 
-1. **The Algorithm:** OBSERVE → THINK → PLAN → BUILD → EXECUTE → VERIFY → LEARN
+1. **The working loop:** observe → think → plan → build → execute → verify → learn
 2. **The grade rule:** every number carries `[M]/[C]/[E]/[A]`; computed inherits the weakest input
 3. **Shrink-once:** demand → required productive hours; supply → delivered productive hours
 4. **Two-sided Monte Carlo:** demand and supply drawn together, so correlation survives
@@ -64,4 +63,4 @@ present. Most days the job is INGEST → MODEL → REPORT.
 
 ---
 
-*Deep context: `~/plumb/TELOS/` | Learnings: `~/plumb/MEMORY/` | Framework: `~/plumb/ALGORITHM.md` | Engine: `~/plumb/docs/ENGINE.md`*
+*Charter: `~/plumb/charter/` | Learnings: `~/plumb/charter/LEARNED.md` | Engine: `~/plumb/docs/ENGINE.md`*

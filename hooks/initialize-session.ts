@@ -62,8 +62,8 @@ async function main() {
     }
 
     const payload: SessionStartPayload = JSON.parse(stdinData);
-    const paiDir = process.env.PAI_DIR || join(homedir(), '.claude');
-    const caseDir = join(homedir(), 'case');
+    const configDir = process.env.PLUMB_CONFIG_DIR || join(homedir(), '.claude');
+    const rootDir = join(import.meta.dir, '..'); // this repository
 
     // 1. Set tab title
     const projectName = getProjectName(payload.cwd);
@@ -71,11 +71,11 @@ async function main() {
 
     // 2. Ensure required directories exist
     const requiredDirs = [
-      join(paiDir, 'hooks', 'lib'),
-      join(caseDir, 'MEMORY', 'Work'),
-      join(caseDir, 'MEMORY', 'Signals'),
-      join(caseDir, 'MEMORY', 'State'),
-      join(caseDir, 'projects'),
+      join(configDir, 'hooks', 'lib'),
+      join(rootDir, 'state', 'work'),
+      join(rootDir, 'state', 'signals'),
+      join(rootDir, 'state'),
+      join(rootDir, 'projects'),
     ];
 
     for (const dir of requiredDirs) {
@@ -85,7 +85,7 @@ async function main() {
     }
 
     // 3. Create session marker file
-    const sessionFile = join(paiDir, '.current-session');
+    const sessionFile = join(configDir, '.current-session');
     writeFileSync(sessionFile, JSON.stringify({
       session_id: payload.session_id,
       started: getLocalTimestamp(),
@@ -94,8 +94,8 @@ async function main() {
       engine: 'PLUMB'
     }, null, 2));
 
-    // 4. Update session count in MEMORY stats
-    const statsPath = join(caseDir, 'MEMORY', 'State', 'stats.json');
+    // 4. Update the session count in runtime state
+    const statsPath = join(rootDir, 'state', 'stats.json');
     try {
       let stats = { sessions: 0, engagements: 0 };
       if (existsSync(statsPath)) {

@@ -7,7 +7,7 @@
 - **Date Range:** November 2025 - January 2026
 - **Consulting Partner:** AArete
 - **Primary Contact:** [Client Contact Name]
-- **Report Author:** [Name], [Organization]
+- **Report Author:** [Analyst name], [Organization]
 
 ## Key Documents
 

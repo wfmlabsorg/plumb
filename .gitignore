@@ -35,3 +35,5 @@ setup.log
 # daily cycle: generated world and outputs (regenerate with bun run cycle:world)
 cycle/world/
 cycle/out/
+# runtime state written by the session hooks
+state/

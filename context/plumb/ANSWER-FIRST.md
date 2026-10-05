@@ -1,7 +1,7 @@
 # Standard — Answer-First Outputs
 
 Every PLUMB report opens with the answer. The evidence follows. This is the one output convention
-carried over from HORIZON, and it is carried because it is the only one that changed how the
+carried over from the earlier prototype, and it is carried because it is the only one that changed how the
 material was read.
 
 ## The Shape

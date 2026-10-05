@@ -20,7 +20,7 @@ nobody accepts is wasted computation.
 
 ### 4. Never Run ANALYZE Because Data Is Present
 Variance decomposition and causal work are invoked by a question, not by a schedule. The default
-path is INGEST → MODEL → REPORT. This is the single biggest difference from HORIZON, which ran
+path is INGEST → MODEL → REPORT. This is the single biggest difference from the earlier prototype, which ran
 every analytical stage every day and generated more findings than any planner could read.
 
 ### 5. Escalate the Rung Only When It Is Earned

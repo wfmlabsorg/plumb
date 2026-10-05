@@ -5,7 +5,7 @@
  * Twelve weeks, two segments, three channels, one cohort. Three planted effects,
  * each a named parameter in P below, each recorded in GROUND-TRUTH.md.
  *
- * Deliberately far smaller than HORIZON's generator (917 lines, seven mechanisms,
+ * Deliberately far smaller than the earlier prototype's generator (917 lines, seven mechanisms,
  * 120 days). The point here is not a rich story; it is a world small enough to
  * check the model against by hand.
  *
@@ -439,7 +439,7 @@ demand spike here has failed the most important check in this file.
 ## What is deliberately NOT planted
 
 No outage, no weather event, no migration, no second cohort, no learning curve, no definition
-change. HORIZON had all of those and the resulting world took 917 lines to generate and a day to
+change. the earlier prototype had all of those and the resulting world took 917 lines to generate and a day to
 understand. Three effects are enough to prove the pipeline recovers what it should, and few enough
 that a person can hold them in their head while reading the output.
 `;
