@@ -55,7 +55,7 @@ function targets(clause: string, text: string): string[] {
   return [...new Set([...ids, ...seg, ...prod])];
 }
 const channelsOf = (clause: string): Channel[] => { const c: Channel[] = []; if (/\b(voice|phones?|calls?)\b/i.test(clause)) c.push("voice"); if (/\bchat/i.test(clause)) c.push("chat"); if (/\bemails?\b/i.test(clause)) c.push("email"); return c; };
-const typeOf = (c: string) => /\b(wave|migrat|legacy book)/i.test(c) ? "migration" : /\b(sick|absence|out (sick|ill)|flu)\b/i.test(c) ? "absence" : /\b(snow|storm|hurricane|weather|flights?)\b/i.test(c) ? "weather" : /\b(timeout|release|goes live|go-live)\b/i.test(c) ? "platform" : /\b(holiday|calendar|reduced hours|closed)\b/i.test(c) || /\bColumbus|Thanksgiving|Christmas\b/.test(c) ? "calendar" : /\b(travell?ers?|onboard\w*|division|clients?|self-service)\b/i.test(c) ? "client" : "other";
+const typeOf = (c: string) => /\b(wave|migrat|legacy book)/i.test(c) ? "migration" : /\b(sick|absence|out (sick|ill)|flu)\b/i.test(c) ? "absence" : /\b(snow|storm|hurricane|weather)\b/i.test(c) ? "weather" : /\b(timeout|release|goes live|go-live)\b/i.test(c) ? "platform" : /\b(holiday|calendar|reduced hours|closed)\b/i.test(c) || /\bColumbus|Thanksgiving|Christmas\b/.test(c) ? "calendar" : /\b(users?|onboard\w*|division|clients?|self-service)\b/i.test(c) ? "client" : "other";
 
 function grade(clause: string, it: Item): { g: Grade; why: string } {
   const all = `${clause} ${it.text}`;
