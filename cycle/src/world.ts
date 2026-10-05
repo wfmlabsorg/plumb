@@ -1,5 +1,5 @@
 /**
- * world.ts — P0: a synthetic travel contact center that looks like the real thing.
+ * world.ts — P0: a synthetic contact center that looks like the real thing.
  *
  * Writes, for every gate × channel × day of history: what was forecast, what happened, how it was
  * staffed and how it performed (the raw extract a WFM platform would export). Also: the events
@@ -18,7 +18,7 @@ const daysBetween = (a: string, b: string) => Math.round((Date.parse(b) - Date.p
 const nthWeekday = (y: number, m: number, wd: number, n: number) => { const d = new Date(Date.UTC(y, m, 1)); while (d.getUTCDay() !== wd) d.setUTCDate(d.getUTCDate() + 1); d.setUTCDate(d.getUTCDate() + 7 * (n - 1)); return iso(d); };
 const lastWeekday = (y: number, m: number, wd: number) => { const d = new Date(Date.UTC(y, m + 1, 0)); while (d.getUTCDay() !== wd) d.setUTCDate(d.getUTCDate() - 1); return iso(d); };
 
-/** US travel holidays and their multipliers on volume (NA full strength; other regions only the year-end). */
+/** US holidays and their multipliers on volume (NA full strength; other regions only the year-end). */
 export function holidayMap(years: number[]): Map<string, { name: string; f: number; naOnly: boolean }> {
   const m = new Map<string, { name: string; f: number; naOnly: boolean }>();
   const put = (d: string, name: string, f: number, naOnly = true) => m.set(d, { name, f: Math.min(m.get(d)?.f ?? 1, f), naOnly });
@@ -44,19 +44,19 @@ const DOW_24H = [0.8, 1.08, 1.06, 1.0, 1.04, 1.06, 0.86];
 const norm = (a: number[]) => { const m = a.reduce((s, x) => s + x, 0) / a.length; return a.map((x) => x / m); };
 const DOWS = { voice: norm(DOW_VOICE), chat: norm(DOW_VOICE), email: norm(DOW_EMAIL), h24: norm(DOW_24H) };
 
-/** Business-travel seasonality: anchors mid-month, cosine-interpolated; October peak; late-November slide. */
+/** Business seasonality: anchors mid-month, cosine-interpolated; October peak; late-November slide. */
 const SEASON = [0.9, 0.98, 1.06, 1.04, 1.05, 1.02, 0.93, 0.91, 1.07, 1.13, 0.97, 0.82];
 export function season(s: string): number {
   const d = new Date(s + "T00:00:00Z"); const m = d.getUTCMonth(), day = d.getUTCDate();
   const t = (day - 15) / 30; const m2 = (m + (t >= 0 ? 1 : 11)) % 12; const w = Math.abs(t);
   const a = SEASON[m]!, b = SEASON[m2]!; const k = (1 - Math.cos(Math.PI * w)) / 2;
   let f = a * (1 - k) + b * k;
-  if (m === 10 && day >= 16) f *= 0.92; // business travel dries up into Thanksgiving
+  if (m === 10 && day >= 16) f *= 0.92; // business demand dries up into Thanksgiving
   return f;
 }
 const seasonAHT = (s: string) => 1 + 0.06 * (season(s) - 1); // busier periods run slightly longer
 
-/** Intraday arrival profile over open hours (travel: morning and early-afternoon peaks). */
+/** Intraday arrival profile over open hours (morning and early-afternoon peaks). */
 export function profile(open: [number, number]): number[] {
   const w: number[] = [];
   for (let h = open[0]; h < open[1]; h++) {
@@ -111,7 +111,7 @@ function plantTruth(start: string, end: string, seed: number): Truth {
       { id: "SC-COLUMBUS", source: "IT-008", gates: GATES.filter((g) => g.product === "D" && g.id !== PLANT.esc).map((g) => g.id), channels: [], from: "2026-10-12", to: "2026-10-12", factor: 0.6 },
       { id: "SC-CHAT-TIMEOUT", source: "IT-007", gates: GATES.filter((g) => g.product === "E").map((g) => g.id), channels: ["chat"], from: "2026-10-20", to: null, factor: 1.1 },
     ],
-    fakeSignal: { claim: `A client moves 3,000 travelers to self-service on 2026-10-12, cutting ${PLANT.fakeSignal} voice by about 15%`, gate: PLANT.fakeSignal, date: "2026-10-12", happened: false },
+    fakeSignal: { claim: `A client moves 3,000 users to self-service on 2026-10-12, cutting ${PLANT.fakeSignal} voice by about 15%`, gate: PLANT.fakeSignal, date: "2026-10-12", happened: false },
   };
 }
 
@@ -266,7 +266,7 @@ export function buildWorld(opts: { seed?: number; start?: string; end?: string; 
   }
   // what operations logged (not the truth)
   const events: LoggedEvent[] = [];
-  for (const s of truth.storms) if (s.logged && s.gates.length) events.push({ id: s.id, start: s.start, end: addDays(s.start, s.days - 1), gates: s.gates.join(";"), channels: "voice;chat;email", type: "weather", description: `${s.name}, travel disruption in affected markets`, source: "weather-feed", params: "" });
+  for (const s of truth.storms) if (s.logged && s.gates.length) events.push({ id: s.id, start: s.start, end: addDays(s.start, s.days - 1), gates: s.gates.join(";"), channels: "voice;chat;email", type: "weather", description: `${s.name}, service disruption in affected markets`, source: "weather-feed", params: "" });
   for (const o of truth.outages) events.push({ id: o.id, start: o.date, end: o.date, gates: o.gate, channels: o.channel, type: "outage", description: `${o.channel} platform outage`, source: "incident-log", params: "" });
   for (const a of truth.absences) if (a.logged) events.push({ id: a.id, start: a.start, end: addDays(a.start, a.days - 1), gates: a.gates.join(";"), channels: "voice;chat;email", type: "absence", description: "illness spike, unplanned absence above plan", source: "ops-log", params: "" });
   for (const [d, x] of hol) if (d >= start && d <= last && x.f < 1) events.push({ id: `HOL-${d}`, start: d, end: d, gates: x.naOnly ? GATES.filter((g) => g.region === "NA").map((g) => g.id).join(";") : "*", channels: "voice;chat;email", type: "holiday", description: x.name, source: "calendar", params: "" });

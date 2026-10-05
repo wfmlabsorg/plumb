@@ -51,7 +51,7 @@ function targets(clause: string, text: string): string[] {
   let prod: string[] = [];
   if (/\bproduct D\b|agency gates/i.test(clause)) prod = GATES.filter((g) => g.product === "D" && !(/ESC stays|except the ESC/i.test(text) && g.segment === "D-ESC")).map((g) => g.id);
   else if (/online product/i.test(clause) && !/legacy/i.test(clause)) prod = GATES.filter((g) => g.product === "E").map((g) => g.id);
-  else if (/NA managed travel gates/i.test(clause)) prod = GATES.filter((g) => g.product === "A" && g.region === "NA").map((g) => g.id);
+  else if (/NA managed service gates/i.test(clause)) prod = GATES.filter((g) => g.product === "A" && g.region === "NA").map((g) => g.id);
   return [...new Set([...ids, ...seg, ...prod])];
 }
 const channelsOf = (clause: string): Channel[] => { const c: Channel[] = []; if (/\b(voice|phones?|calls?)\b/i.test(clause)) c.push("voice"); if (/\bchat/i.test(clause)) c.push("chat"); if (/\bemails?\b/i.test(clause)) c.push("email"); return c; };

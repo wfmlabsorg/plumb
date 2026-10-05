@@ -8,7 +8,7 @@ beforeAll(() => { w = buildWorld(); }, 120_000);
 const avg = (a: number[]) => a.reduce((s, x) => s + x, 0) / Math.max(1, a.length);
 const rows = (g: string, c: string) => w.extract.filter((r) => r.gate === g && r.channel === c);
 
-describe("the world looks like a travel contact center", () => {
+describe("the world looks like a contact center", () => {
   test("deterministic for a seed", () => { const b = buildWorld(); expect(b.extract.slice(0, 50)).toEqual(w.extract.slice(0, 50)); expect(b.extract.length).toBe(w.extract.length); }, 120_000);
   test("every gate × channel × day is present, history ends the day before the run", () => {
     const days = new Set(w.extract.map((r) => r.date)); expect(days.size).toBe(733); expect(w.truth.end).toBe("2026-10-03");
@@ -21,7 +21,7 @@ describe("the world looks like a travel contact center", () => {
     expect(we).toBeLessThan(Math.min(th, fr));
     expect(Math.max(su, sa)).toBeLessThan(0.6 * mo);
   });
-  test("October peak; business travel falls in the second half of November; Thanksgiving is the low", () => {
+  test("October peak; business demand falls in the second half of November; Thanksgiving is the low", () => {
     expect(season("2025-10-15")).toBeGreaterThan(season("2025-11-24"));
     const wk = (a: string, b: string) => avg(rows(PLANT.levelShift, "voice").filter((r) => r.date >= a && r.date <= b && dow(r.date) > 0 && dow(r.date) < 6).map((r) => r.act_volume));
     expect(wk("2025-11-16", "2025-11-30")).toBeLessThan(0.75 * wk("2025-10-01", "2025-10-31"));

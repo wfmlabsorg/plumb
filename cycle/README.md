@@ -2,6 +2,16 @@
 
 **See it run:** `bun run cycle:demo` (about 3 min) writes `cycle/out/demo/index.html`. It covers two simulated days, nine weeks apart, through the inside-the-walls path. **Run it on real files:** open `cycle/runner/dist/plumb-runner.html`.
 
+**Read the method.** The WFM Labs wiki explains what this code does and why, in the series *Agentic WFM Protocol*:
+- [Agentic WFM Protocol](https://wiki.wfmlabs.org/wiki/Agentic_WFM_Protocol) — the hub: thirteen steps, ten principles, the two-zone rule, the daily cycle
+- [Forecast Value Added in Workforce Management](https://wiki.wfmlabs.org/wiki/Forecast_Value_Added_in_Workforce_Management) — the learning phase: scoring each layer, earned learning, earned auto-approval
+- [Human Gates and Number Grades](https://wiki.wfmlabs.org/wiki/Human_Gates_and_Number_Grades) — the owner review, guarded publish, and the [source grades on intake signals](https://wiki.wfmlabs.org/wiki/Human_Gates_and_Number_Grades#Source_grades_on_intake_signals)
+- [The Short-Term Forecasting Loop with an Agent Team](https://wiki.wfmlabs.org/wiki/The_Short-Term_Forecasting_Loop_with_an_Agent_Team) — the daily clock this cycle implements
+- [The Shape File Bridge](https://wiki.wfmlabs.org/wiki/The_Shape_File_Bridge) — contracts and one-file tools that run where the data lives
+- [Work Intake for Planning and Analytics Teams](https://wiki.wfmlabs.org/wiki/Work_Intake_for_Planning_and_Analytics_Teams) — where the asks and signals come from
+
+The live end-to-end demo, with an animated flow and the daily brief: https://agentic-demo.wfmlabs.com
+
 PLUMB as an operating process: a daily loop that reads yesterday, learns what was real, adjusts the
 forward outlook, and gets the gate owner's signature before anything is published. **Synthetic,
 code-named data only.**
@@ -45,8 +55,8 @@ bun run cycle:test
   - **E:** online, more automated, chat-heavy, shorter handle times.
 - **Outcomes are realized, not expected.** Arrivals clump hour by hour, and each call lands in or out of threshold by chance around Erlang A. Small gates overflow to backup skills. So small gates are more volatile and miss more often: voice service level averages 76% on small gates against 84% on large pools, and abandons run 4–6%.
 
-- **Shape.** It has the travel weekday pattern: Monday and Tuesday busiest, Wednesday down, Thursday and Friday up, weekends low. Seasonality peaks in October, slides through the second half of November, and troughs over the year-end.
-- **Disruption.** US travel holidays, storms and outages are all modeled. Voice handle time runs 20–30 minutes and goes longer in a crisis.
+- **Shape.** It has a business weekday pattern: Monday and Tuesday busiest, Wednesday down, Thursday and Friday up, weekends low. Seasonality peaks in October, slides through the second half of November, and troughs over the year-end.
+- **Disruption.** US holidays, storms and outages are all modeled. Voice handle time runs 20–30 minutes and goes longer in a crisis.
 - **Staffing.** Capacity is built for demand six weeks earlier, so peaks go in short and troughs carry overhead.
 - **Outcomes.** Service level, abandons and ASA come from Erlang A per open hour.
 

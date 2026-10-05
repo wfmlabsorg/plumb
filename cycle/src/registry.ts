@@ -4,7 +4,7 @@
  * A gate is the unit the WFM platform plans for (a CT that may span skills). Real estates run to
  * ~1,500 gates averaging about 12 agents, with a few shared pools of 50–100. This synthetic estate
  * keeps those proportions at prototype scale. Code-named: products A/C/D/E, segments by number.
- *   A — managed travel, highly customized, many small gates
+ *   A — managed service, highly customized, many small gates
  *   C — legacy book, highly segmented, migrating
  *   D — public-sector agencies: larger gates plus a 24-hour emergency service center spanning them
  *   E — online, more automation, moderate gates, chat-heavy, shorter handle times
@@ -27,7 +27,7 @@ export interface Gate {
 export const PRODUCTIVE_HOURS_PER_FTE_DAY = 7.5;
 
 const CH = {
-  voice: (aht: number, o: Partial<ChannelSpec> = {}): ChannelSpec => ({ channel: "voice", baseDaily: 0, ahtSec: aht, ahtBasis: "worked", concurrency: 1, targetSL: 0.8, thresholdSec: 20, patienceSec: 480, noiseCv: 0.06, ...o }), // travelers rebooking wait
+  voice: (aht: number, o: Partial<ChannelSpec> = {}): ChannelSpec => ({ channel: "voice", baseDaily: 0, ahtSec: aht, ahtBasis: "worked", concurrency: 1, targetSL: 0.8, thresholdSec: 20, patienceSec: 480, noiseCv: 0.06, ...o }), // long-patience callers
   chat: (aht: number, o: Partial<ChannelSpec> = {}): ChannelSpec => ({ channel: "chat", baseDaily: 0, ahtSec: aht, ahtBasis: "elapsed", concurrency: 1.7, targetSL: 0.8, thresholdSec: 180, patienceSec: 420, noiseCv: 0.08, ...o }),
   email: (aht: number, o: Partial<ChannelSpec> = {}): ChannelSpec => ({ channel: "email", baseDaily: 0, ahtSec: aht, ahtBasis: "worked", concurrency: 1, targetSL: 0.9, thresholdSec: 7200, patienceSec: 0, noiseCv: 0.1, ...o }),
 };
@@ -47,10 +47,10 @@ const G = (id: string, name: string, product: Product, segment: string, sizeFte:
 const ANCHORS: Gate[] = [
   G("G101", "Online · NA", "E", "E-S01", 28, [[CH.voice(1080), 0.45], [CH.chat(1800, { concurrency: 1.8 }), 0.4], [CH.email(780), 0.15]], { trendPerYear: 0.08 }),
   G("G102", "Legacy client book · NA", "C", "C-S01", 18, [[CH.voice(1560), 0.6], [CH.chat(2400), 0.2], [CH.email(1140), 0.2]], { trendPerYear: 0 }),
-  G("G103", "Managed travel · client group · NA", "A", "A-S01", 20, [[CH.voice(1680), 0.75], [CH.email(1200), 0.25]]),
+  G("G103", "Managed service · client group · NA", "A", "A-S01", 20, [[CH.voice(1680), 0.75], [CH.email(1200), 0.25]]),
   G("G104", "Emergency service center (24h, all agencies)", "D", "D-ESC", 90, [[CH.voice(1440, { patienceSec: 600 }), 1]], { pooled: true, openHours: [0, 24], weatherSensitivity: 1, trendPerYear: 0.01, reviewThresholdPct: 8 }),
   G("G105", "After-hours shared pool · A", "A", "A-POOL", 55, [[CH.voice(1740, { patienceSec: 600 }), 1]], { pooled: true, openHours: [0, 24], weatherSensitivity: 0.9, reviewThresholdPct: 8 }),
-  G("G106", "Managed travel · small client · NA", "A", "A-S02", 6, [[CH.voice(1620), 0.8], [CH.email(1140), 0.2]]),
+  G("G106", "Managed service · small client · NA", "A", "A-S02", 6, [[CH.voice(1620), 0.8], [CH.email(1140), 0.2]]),
 ];
 export const PLANT = { migrationTo: "G101", migrationFrom: "G102", levelShift: "G103", esc: "G104", afterHours: "G105", smallAbsence: "G106", fakeSignal: "G103", outage: "G101" } as const;
 
@@ -60,7 +60,7 @@ function generate(seed = 7): Gate[] {
   const region = (): Gate["region"] => { const x = rng.next(); return x < 0.8 ? "NA" : x < 0.92 ? "EMEA" : "APAC"; };
   const hours = (r: Gate["region"]): [number, number] => (r === "NA" ? [6, 22] : [7, 19]);
   // A: many small, customized gates (some segments one gate, some several)
-  for (let s = 3; s <= 14; s++) { const k = 1 + Math.floor(rng.next() * 3); for (let i = 0; i < k; i++) { const r = region(); out.push(G(`G${n++}`, `Managed travel · segment ${s}${k > 1 ? ` · ${i + 1}` : ""}`, "A", `A-S${String(s).padStart(2, "0")}`, size(9, 3, 30), [[CH.voice(1560 + rng.next() * 240), 0.75], [CH.email(1080 + rng.next() * 180), 0.25]], { region: r, openHours: hours(r), weatherSensitivity: r === "NA" ? 0.5 + rng.next() * 0.3 : 0.25, trendPerYear: 0.02 + rng.next() * 0.03 })); } }
+  for (let s = 3; s <= 14; s++) { const k = 1 + Math.floor(rng.next() * 3); for (let i = 0; i < k; i++) { const r = region(); out.push(G(`G${n++}`, `Managed service · segment ${s}${k > 1 ? ` · ${i + 1}` : ""}`, "A", `A-S${String(s).padStart(2, "0")}`, size(9, 3, 30), [[CH.voice(1560 + rng.next() * 240), 0.75], [CH.email(1080 + rng.next() * 180), 0.25]], { region: r, openHours: hours(r), weatherSensitivity: r === "NA" ? 0.5 + rng.next() * 0.3 : 0.25, trendPerYear: 0.02 + rng.next() * 0.03 })); } }
   // C: legacy, highly segmented, small gates, some chat
   for (let s = 2; s <= 8; s++) { const k = 1 + Math.floor(rng.next() * 2); for (let i = 0; i < k; i++) { const r = region(); const chat = rng.chance(0.3); out.push(G(`G${n++}`, `Legacy book · segment ${s}${k > 1 ? ` · ${i + 1}` : ""}`, "C", `C-S${String(s).padStart(2, "0")}`, size(10, 3, 28), chat ? [[CH.voice(1500 + rng.next() * 180), 0.6], [CH.chat(2280), 0.2], [CH.email(1080), 0.2]] : [[CH.voice(1500 + rng.next() * 180), 0.75], [CH.email(1080), 0.25]], { region: r, openHours: hours(r), weatherSensitivity: r === "NA" ? 0.6 : 0.25, trendPerYear: -0.02 })); } }
   out.push(G(`G${n++}`, "Legacy shared pool · C", "C", "C-POOL", 60, [[CH.voice(1560), 0.8], [CH.email(1080), 0.2]], { pooled: true, weatherSensitivity: 0.7, trendPerYear: -0.03 }));
