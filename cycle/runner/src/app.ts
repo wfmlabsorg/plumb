@@ -1,7 +1,8 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 /** PLUMB runner: the whole daily cycle in one file, on the work laptop, with nothing installed and nothing uploaded. */
-import { mdToHtml } from "../../src/md";
+import { mdToHtml, REPORT_CSS } from "../../src/md";
+import { briefHtml, decisionsCsv, type Brief } from "../../src/brief";
 import { publish, wfmExport, type Decisions, type Packet } from "../../src/review";
 import { useRegistry, type Gate } from "../../src/registry";
 import { toCsv } from "../../src/csv";
@@ -12,7 +13,7 @@ declare const __WORKER_JS__: string; declare const __REVIEW_JS__: string;
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 const files: Record<string, File | undefined> = {};
-let last: { asOf: string; packet: Packet; rows: ProposedRow[]; reports: { id: string; title: string; md: string }[] } | null = null;
+let last: { asOf: string; packet: Packet; rows: ProposedRow[]; reports: { id: string; title: string; md: string }[]; brief: Brief } | null = null;
 const worker = new Worker(URL.createObjectURL(new Blob([__WORKER_JS__], { type: "text/javascript" })));
 const read = (k: string) => files[k]?.text();
 const download = (name: string, text: string, type = "text/plain") => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); };
@@ -38,7 +39,7 @@ worker.onmessage = (e) => {
     log(m.ok ? "contracts ok" : `${m.total} problem(s)`); return;
   }
   if (m.kind === "done") {
-    useRegistry(m.gates as Gate[]); last = { asOf: m.out.asOf, packet: m.out.packet, rows: m.out.rows, reports: m.out.reports };
+    useRegistry(m.gates as Gate[]); last = { asOf: m.out.asOf, packet: m.out.packet, rows: m.out.rows, reports: m.out.reports, brief: m.out.brief };
     log(`done · as of ${m.out.asOf}`);
     $("#check").innerHTML = `<p><b>Contracts ok.</b> ${esc(m.summary)}</p>`;
     $("#results").hidden = false;
@@ -47,7 +48,11 @@ worker.onmessage = (e) => {
     show(0);
   }
 };
-function show(i: number) { if (!last) return; const r = last.reports[i]!; for (const b of document.querySelectorAll("#tabs button")) b.classList.toggle("on", (b as HTMLElement).dataset.i === String(i)); $("#report").innerHTML = mdToHtml(r.md); $<HTMLButtonElement>("#dlReport").onclick = () => download(`${r.id}-${last!.asOf}.md`, r.md, "text/markdown"); }
+function show(i: number) { if (!last) return; const r = last.reports[i]!; for (const b of document.querySelectorAll("#tabs button")) b.classList.toggle("on", (b as HTMLElement).dataset.i === String(i)); if (r.id === "brief" && last.brief) { // the brief carries charts: render the full page in an isolated frame
+    const html = briefHtml(last.brief, REPORT_CSS); const f = document.createElement("iframe"); f.title = "Daily brief"; f.style.cssText = "width:100%;border:0;min-height:900px"; f.srcdoc = html;
+    f.onload = () => { const d = f.contentDocument; if (d) f.style.height = `${d.documentElement.scrollHeight + 20}px`; };
+    $("#report").replaceChildren(f); $<HTMLButtonElement>("#dlReport").onclick = () => download(`brief-${last!.asOf}.html`, html, "text/html"); return; }
+  $("#report").innerHTML = mdToHtml(r.md); $<HTMLButtonElement>("#dlReport").onclick = () => download(`${r.id}-${last!.asOf}.md`, r.md, "text/markdown"); }
 
 document.addEventListener("DOMContentLoaded", () => {
   for (const el of document.querySelectorAll<HTMLInputElement>("input[type=file][data-k]")) el.addEventListener("change", () => { files[el.dataset.k!] = el.files?.[0]; });
@@ -56,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#tabs").addEventListener("click", (e) => { const b = (e.target as HTMLElement).closest("button"); if (b) show(+b.dataset.i!); });
   $("#openReview").addEventListener("click", () => { if (!last) return; const html = reviewPage(__REVIEW_JS__, JSON.stringify(last.packet)); window.open(URL.createObjectURL(new Blob([html], { type: "text/html" })), "_blank"); });
   $("#dlReview").addEventListener("click", () => last && download(`review-${last.asOf}.html`, reviewPage(__REVIEW_JS__, JSON.stringify(last.packet)), "text/html"));
+  $("#dlDecisions").addEventListener("click", () => last?.brief && download(`brief-decisions-${last.asOf}.csv`, decisionsCsv(last.brief), "text/csv"));
   $("#dlPacket").addEventListener("click", () => last && download(`review-packet-${last.asOf}.json`, JSON.stringify(last.packet), "application/json"));
   $<HTMLInputElement>("#decisions").addEventListener("change", async (e) => {
     const f = (e.target as HTMLInputElement).files?.[0]; if (!f || !last) return;

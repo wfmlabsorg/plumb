@@ -15,6 +15,7 @@ import { backtest, earning, effectLibrary, forwardCheck, learningPolicy, type Fo
 import { learnMarkdown } from "./learn-report";
 import { buildPacket, publish, wfmExport, type Decisions, type Packet, type RecordRow } from "./review";
 import { addDays, type ExtractRow, type OutlookRow } from "./world";
+import { buildBrief, briefMarkdown, type Brief } from "./brief";
 
 export interface PipelineInput { data: Dataset; items?: Item[]; signalDecisions?: Record<string, "accept" | "reject">; weeks?: number; reviewDecisions?: Decisions; priorRecord?: { asOf: string; rows: RecordRow[]; signals?: Signal[]; edits?: Decisions["decisions"] }; progress?: (s: string) => void }
 export interface PipelineOutput {
@@ -22,6 +23,8 @@ export interface PipelineOutput {
   published: { ok: boolean; problems: string[]; version?: string; record?: RecordRow[]; wfm?: ReturnType<typeof wfmExport> } | null; forward: Forward | null; summary: Record<string, string | number>;
   /** structured outputs for downstream views (shape files), alongside the Markdown reports */
   monthly: MonthlyLock; weekly: WeeklyRefresh; outlook: OutlookRow[]; signals: Signal[];
+  /** the daily brief: headline, decisions with owners and due dates, risks, trends (plumb.brief/1) */
+  brief: Brief;
 }
 
 export function runPipeline(inp: PipelineInput): PipelineOutput {
@@ -48,10 +51,12 @@ export function runPipeline(inp: PipelineInput): PipelineOutput {
     const asRows: ProposedRow[] = pr.rows.map((r) => ({ as_of: pr.asOf, date: r.date, gate: r.gate, channel: r.channel, fc_volume: r.prior_record_volume, fc_aht_sec: r.aht_sec, fc_req_fte: r.req_fte, planned_sched_fte: 0, fc_volume_proposed: r.proposal_volume, fc_aht_proposed: r.aht_sec, req_proposed_fte: r.req_fte, over_under_fte: 0, sl_projected: 0, overlay_volume: r.migration_overlay_volume, signal_overlay_volume: r.signal_overlay_volume, sd_log: 0 }));
     if (after.length) fwd = forwardCheck(asRows, after, [], pr.signals ?? [], pr.edits ?? []); }
   reports.push({ id: "learn", title: `Learning · as of ${st.asOf}`, md: learnMarkdown(st.asOf, b, earned, fwd, effectLibrary(data.extract, data.events), policy) });
+  say("daily brief"); const brief = buildBrief({ asOf: st.asOf, through, pdp: p, state: st, rows, packet, signals: g.signals, overlays: g.overlays, earned, backtest: b, weekly: wr2, monthly: ml, extract: data.extract, events: data.events, learning: policy, forward: fwd });
+  reports.unshift({ id: "brief", title: `Daily brief · as of ${st.asOf}`, md: briefMarkdown(brief) });
   let published: PipelineOutput["published"] = null;
   if (inp.reviewDecisions) { say("publish"); const res = publish(packet, inp.reviewDecisions, rows); published = { ok: res.ok, problems: res.problems, version: res.version, record: res.rows, wfm: res.rows ? wfmExport(res.rows) : undefined }; }
   const moved = packet.gates.filter((x) => Math.abs(x.change_pct) >= 1).length;
-  return { asOf: st.asOf, through, reports, packet, rows, published, forward: fwd, monthly: ml, weekly: wr2, outlook: data.outlook, signals: g.signals,
+  return { asOf: st.asOf, through, reports, packet, rows, published, forward: fwd, monthly: ml, weekly: wr2, outlook: data.outlook, signals: g.signals, brief,
     summary: { gates: GATES.length, history: `${data.extract[0]!.date} → ${through}`, below_target_yesterday: p.lines.filter((l) => l.sl_gap_pts < -5).length, flags_in_history: st.detected.length, signals: g.signals.length, overlays: g.overlays.length, gates_learning: policy.size, gates_moved: moved, earned_auto_approval: earned.filter((e) => e.eligible).length, hiring_asks: ml.hires.length } };
 }
 

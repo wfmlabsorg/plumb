@@ -23,7 +23,7 @@ const BODY = `<main><h1>PLUMB runner</h1><p class="muted">The daily forecast cyc
 <label>A previously published record (CSV, optional) <small>scored against the actuals that arrived since</small><input type="file" data-k="prior" accept=".csv"></label>
 <label>…and its signed decisions (JSON, optional)<input type="file" data-k="priordec" accept=".json"></label></div>
 <div class="row"><button id="validate">Check against the contracts</button><button id="run" class="primary">Run the cycle</button></div><pre id="log"></pre><div id="check"></div>
-<section id="results" hidden><h2>2 · Results</h2><div id="summary"></div><div id="tabs"></div><div class="row"><button id="dlReport">Download this report (.md)</button></div><div id="report"></div>
+<section id="results" hidden><h2>2 · Results</h2><div id="summary"></div><div id="tabs"></div><div class="row"><button id="dlReport">Download this report</button><button id="dlDecisions">Download the brief's decision list (.csv)</button></div><div id="report"></div>
 <h2>3 · Review and publish</h2><div class="row"><button id="openReview" class="primary">Open the review screen</button><button id="dlReview">Download the review screen</button><button id="dlPacket">Download the packet</button></div>
 <p class="muted">Decide every gate, sign, and the decisions file downloads. Load it here to publish: it is refused if unsigned, incomplete or stale.</p><label>Signed decisions <input type="file" id="decisions" accept=".json"></label><div id="pub"></div></section>
 <p class="muted">Contracts and mapping: cycle/docs/CONTRACTS.md. Synthetic data unless you load your own.</p></main>`;

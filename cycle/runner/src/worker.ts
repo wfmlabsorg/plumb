@@ -19,6 +19,6 @@ self.onmessage = (e: MessageEvent<Msg>) => {
     if (m.priorRecord) { const rows = fromCsv(m.priorRecord).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, ["version", "date", "gate", "channel", "source"].includes(k) ? v : +v]))) as unknown as RecordRow[];
       priorRecord = { asOf: String(rows[0]?.version ?? "").slice(0, 10), rows, edits: m.priorDecisions?.decisions ?? [] }; }
     const out = runPipeline({ data: loaded.data, items: m.items, signalDecisions: m.signalDecisions, priorRecord, progress: (s) => post({ kind: "progress", step: s }) });
-    post({ kind: "done", summary: loaded.summary, gates: loaded.data.gates, out: { asOf: out.asOf, through: out.through, reports: out.reports, packet: out.packet, rows: out.rows, summary: out.summary, forward: out.forward } });
+    post({ kind: "done", summary: loaded.summary, gates: loaded.data.gates, out: { asOf: out.asOf, through: out.through, reports: out.reports, packet: out.packet, rows: out.rows, summary: out.summary, forward: out.forward, brief: out.brief } });
   } catch (err) { post({ kind: "error", message: String((err as Error)?.stack ?? err).slice(0, 2000) }); }
 };
